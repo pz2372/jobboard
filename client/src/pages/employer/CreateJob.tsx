@@ -88,14 +88,14 @@ const CreateJob = () => {
     "Transportation",
     "Media",
   ];
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setJobData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const fullJobData = {
       ...jobData,
@@ -107,34 +107,34 @@ const CreateJob = () => {
       setCurrentStep(2);
     }, 2000);
   };
-  const handleAddSkill = (e) => {
+  const handleAddSkill = (e: any) => {
     e.preventDefault();
     if (newSkill.trim()) {
       setSkills([...skills, newSkill.trim()]);
       setNewSkill("");
     }
   };
-  const removeSkill = (skillToRemove) => {
+  const removeSkill = (skillToRemove: any) => {
     setSkills(skills.filter((skill) => skill !== skillToRemove));
   };
-  const addSuggestedSkill = (skill) => {
+  const addSuggestedSkill = (skill: any) => {
     if (!skills.includes(skill)) {
       setSkills([...skills, skill]);
     }
   };
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
-  const handleAddTag = (e) => {
+  const handleAddTag = (e: any) => {
     e.preventDefault();
     if (newTag.trim()) {
       setTags([...tags, newTag.trim()]);
       setNewTag("");
     }
   };
-  const removeTag = (tagToRemove) => {
+  const removeTag = (tagToRemove: any) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
-  const addSuggestedTag = (tag) => {
+  const addSuggestedTag = (tag: any) => {
     if (!tags.includes(tag)) {
       setTags([...tags, tag]);
     }

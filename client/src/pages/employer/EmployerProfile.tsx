@@ -1,74 +1,68 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import {
-    Building2,
-    Settings,
-    Mail,
-    Phone,
-    MapPin,
-    Globe,
-    Save,
-    X,
-  } from "lucide-react";
+  Building2,
+  Settings,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Save,
+  X,
+} from "lucide-react";
+
+type companyInfo = {
+  name: string;
+  location: string;
+  website: string;
+  description: string;
+  email: string;
+  phone: string;
+};
 
 const EmployerProfile = () => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [originalInfo, setOriginalInfo] = useState(null);
-    const [companyInfo, setCompanyInfo] = useState({
-      name: "Tech Solutions Inc.",
-      location: "San Francisco, CA",
-      website: "techsolutions.com",
-      description:
-        "Tech Solutions Inc. is a leading software development company specializing in enterprise solutions, cloud computing, and artificial intelligence. With over 10 years of experience, we've helped hundreds of businesses transform their digital presence.",
-      email: "contact@techsolutions.com",
-      phone: "+1 (555) 123-4567",
-    });
-    const handleEdit = () => {
-      setOriginalInfo(companyInfo);
-      setIsEditing(true);
-    };
-    const handleCancel = () => {
-      setCompanyInfo(originalInfo);
-      setIsEditing(false);
-    };
-    const handleSave = () => {
-      setIsEditing(false);
-    };
+  const [isEditing, setIsEditing] = useState(false);
+  const [originalInfo, setOriginalInfo] = useState<companyInfo | null>(null);
+  const [companyInfo, setCompanyInfo] = useState<companyInfo | null>({
+    name: "Tech Solutions Inc.",
+    location: "San Francisco, CA",
+    website: "techsolutions.com",
+    description:
+      "Tech Solutions Inc. is a leading software development company specializing in enterprise solutions, cloud computing, and artificial intelligence. With over 10 years of experience, we've helped hundreds of businesses transform their digital presence.",
+    email: "contact@techsolutions.com",
+    phone: "+1 (555) 123-4567",
+  });
+  const handleEdit = () => {
+    setOriginalInfo(companyInfo);
+    setIsEditing(true);
+  };
+  const handleCancel = () => {
+    setCompanyInfo(originalInfo);
+    setIsEditing(false);
+  };
+  const handleSave = () => {
+    setIsEditing(false);
+  };
 
-    return(<main className="min-h-screen bg-gradient-to-br from-teal-50 to-teal-100 p-6">
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-teal-50 to-teal-100 p-6">
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white/80 backdrop-blur-lg rounded-full shadow-lg p-2 max-w-2xl w-full">
         <div className="flex justify-center px-4">
-          <motion.button
-            whileHover={{
-              scale: 1.05,
-            }}
-            whileTap={{
-              scale: 0.95,
-            }}
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-md"
-          >
+          <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-md">
             <Building2 size={20} />
             <span>Company</span>
-          </motion.button>
+          </button>
         </div>
       </nav>
 
       <div className="max-w-7xl mx-auto pt-24">
-        <motion.header
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          className="relative bg-gradient-to-r from-teal-500 to-teal-600 rounded-3xl shadow-xl p-12 mb-8 overflow-hidden"
-        >
+        <header className="relative bg-gradient-to-r from-teal-500 to-teal-600 rounded-3xl shadow-xl p-12 mb-8 overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className={`absolute bg-white/10 rounded-full blur-xl animate-float-${i + 1}`}
+                className={`absolute bg-white/10 rounded-full blur-xl animate-float-${
+                  i + 1
+                }`}
                 style={{
                   width: `${Math.random() * 200 + 100}px`,
                   height: `${Math.random() * 200 + 100}px`,
@@ -83,52 +77,31 @@ const EmployerProfile = () => {
           <div className="absolute top-8 right-8 flex gap-2">
             {isEditing ? (
               <>
-                <motion.button
-                  whileHover={{
-                    scale: 1.05,
-                  }}
-                  whileTap={{
-                    scale: 0.95,
-                  }}
+                <button
                   onClick={handleCancel}
                   className="p-2 bg-white/20 rounded-full text-white transition-all duration-300 hover:bg-white/40 hover:shadow-lg hover:shadow-white/20"
                 >
                   <X size={20} />
-                </motion.button>
-                <motion.button
-                  whileHover={{
-                    scale: 1.05,
-                  }}
-                  whileTap={{
-                    scale: 0.95,
-                  }}
+                </button>
+                <button
                   onClick={handleSave}
                   className="p-2 bg-white/20 rounded-full text-white transition-all duration-300 hover:bg-white/40 hover:shadow-lg hover:shadow-white/20"
                 >
                   <Save size={20} />
-                </motion.button>
+                </button>
               </>
             ) : (
-              <motion.button
-                whileHover={{
-                  scale: 1.05,
-                }}
-                whileTap={{
-                  scale: 0.95,
-                }}
+              <button
                 onClick={handleEdit}
                 className="p-2 bg-white/20 rounded-full text-white hover:bg-white/30 transition-colors"
               >
                 <Settings size={20} />
-              </motion.button>
+              </button>
             )}
           </div>
 
           <div className="relative flex items-center gap-8">
-            <motion.img
-              whileHover={{
-                scale: 1.05,
-              }}
+            <img
               src="https://images.unsplash.com/photo-1560179707-f14e90ef3623"
               alt="Company Logo"
               className="w-40 h-40 rounded-2xl object-cover shadow-lg ring-4 ring-white/20"
@@ -189,12 +162,9 @@ const EmployerProfile = () => {
               </div>
             </div>
           </div>
-        </motion.header>
+        </header>
 
-        <motion.div
-          layout
-          className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8"
-        >
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8">
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold text-teal-600">
@@ -270,9 +240,10 @@ const EmployerProfile = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </main>)
-}
+    </main>
+  );
+};
 
-export default EmployerProfile
+export default EmployerProfile;

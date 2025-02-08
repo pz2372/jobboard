@@ -34,7 +34,7 @@ const EmployerSignup = () => {
   });
   const [passwordError, setPasswordError] = useState("");
   const [validationError, setValidationError] = useState("");
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -124,7 +124,6 @@ const EmployerSignup = () => {
       setIsSuccess(true);
     } catch (error) {
       setSubmissionError(
-        error.message ||
           "An error occurred during registration. Please try again."
       );
     } finally {
@@ -341,7 +340,7 @@ const EmployerSignup = () => {
                   {step === 1 ? (
                     <button
                       onClick={handleNext}
-                      disabled={passwordError}
+                      disabled={passwordError? true: false}
                       className="flex-1 bg-teal-600 text-white px-8 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105 text-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       Next
