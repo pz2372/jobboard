@@ -18,7 +18,7 @@ const PasswordSettings = ({ onBack }: any) => {
     newPassword: "",
     confirmPassword: "",
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     // Handle password update logic
   };
@@ -89,7 +89,7 @@ const LocationSettings = ({ onBack }: any) => {
     country: "",
     postalCode: "",
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     // Handle location update logic
   };
@@ -173,7 +173,7 @@ const PersonalSettings = ({ onBack }: any) => {
     email: "",
     phone: "",
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     // Handle personal info update logic
   };
@@ -237,7 +237,7 @@ const VisibilitySettings = ({ onBack }: any) => {
     email: false,
     phone: false,
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     // Handle visibility update logic
   };
@@ -309,7 +309,7 @@ const NotificationSettings = ({ onBack }: any) => {
     push: true,
     sms: false,
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     // Handle notifications update logic
   };
