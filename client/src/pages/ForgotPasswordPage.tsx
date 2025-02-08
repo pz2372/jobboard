@@ -4,7 +4,7 @@ import {
     ArrowLeftIcon
   } from "lucide-react";
 
-const ResetPassword = () => {
+const ForgotPasswordPage = () => {
     return (<main className="max-w-7xl mx-auto px-4 py-8">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-12">
@@ -44,4 +44,4 @@ const ResetPassword = () => {
       </main>)
 }
 
-export default ResetPassword
+export default ForgotPasswordPage
