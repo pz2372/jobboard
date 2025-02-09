@@ -20,8 +20,8 @@ import {
 const CreateJob = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [skills, setSkills] = useState([]);
-  const [newSkill, setNewSkill] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState<string>("");
   const [jobData, setJobData] = useState({
     title: "",
     type: "",
@@ -95,6 +95,8 @@ const CreateJob = () => {
       [name]: value,
     }));
   };
+
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const fullJobData = {
@@ -107,6 +109,8 @@ const CreateJob = () => {
       setCurrentStep(2);
     }, 2000);
   };
+
+
   const handleAddSkill = (e: any) => {
     e.preventDefault();
     if (newSkill.trim()) {
@@ -114,16 +118,24 @@ const CreateJob = () => {
       setNewSkill("");
     }
   };
+
+
   const removeSkill = (skillToRemove: any) => {
     setSkills(skills.filter((skill) => skill !== skillToRemove));
   };
+
+
   const addSuggestedSkill = (skill: any) => {
     if (!skills.includes(skill)) {
       setSkills([...skills, skill]);
     }
   };
-  const [tags, setTags] = useState([]);
-  const [newTag, setNewTag] = useState("");
+
+
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>("");
+
+
   const handleAddTag = (e: any) => {
     e.preventDefault();
     if (newTag.trim()) {
@@ -131,9 +143,13 @@ const CreateJob = () => {
       setNewTag("");
     }
   };
+
+
   const removeTag = (tagToRemove: any) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
+
+
   const addSuggestedTag = (tag: any) => {
     if (!tags.includes(tag)) {
       setTags([...tags, tag]);

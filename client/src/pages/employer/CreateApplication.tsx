@@ -14,11 +14,39 @@ import {
   AlertCircleIcon,
 } from "lucide-react";
 
+type Document = {
+  required: boolean;
+  maxSize: string;
+  allowedTypes: string[];
+};
+
+// Define the type for the documents state
+type Documents = {
+  [documentType: string]: Document;
+};
+
+type Question = {
+  id: number;
+  type: "text" | "multiple" | "yesno"; // Add other types as needed
+  question: string;
+  required: boolean;
+  options: string[];
+};
+
+type QuestionType = "text" | "multiple" | "yesno";
+
+type QuestionCategories = "Experience" | "Background" | "Skills" | "Culture";
+
+interface PreviewModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+  }
+
 const CreateApplication = () => {
   const [currentStep, setCurrentStep] = useState(2);
   const [showPreview, setShowPreview] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [documents, setDocuments] = useState({
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [documents, setDocuments] = useState<Documents>({
     resume: {
       required: true,
       maxSize: "5MB",
@@ -30,14 +58,16 @@ const CreateApplication = () => {
       allowedTypes: ["PDF", "DOC", "DOCX"],
     },
   });
-  const [newQuestion, setNewQuestion] = useState({
+  const [newQuestion, setNewQuestion] = useState<Question>({
+    id: 0,
     type: "text",
     question: "",
     required: false,
     options: [""],
   });
   const [usedQuestions, setUsedQuestions] = useState(new Set());
-  const handleDocumentRequirementToggle = (documentType) => {
+
+  const handleDocumentRequirementToggle = (documentType: string) => {
     setDocuments((prev) => ({
       ...prev,
       [documentType]: {
@@ -46,7 +76,8 @@ const CreateApplication = () => {
       },
     }));
   };
-  const fullQuestionPool = {
+
+  const fullQuestionPool: Record<QuestionCategories, string[]> = {
     Experience: [
       "What makes you a good fit for this position?",
       "Describe your most relevant work experience.",
@@ -96,6 +127,8 @@ const CreateApplication = () => {
       "What makes a great workplace for you?",
     ],
   };
+
+
   const [availableQuestions, setAvailableQuestions] = useState(
     Object.fromEntries(
       Object.entries(fullQuestionPool).map(([category, questions]) => [
@@ -104,16 +137,19 @@ const CreateApplication = () => {
       ])
     )
   );
+
+
   const handleAddQuestion = () => {
     if (newQuestion.question.trim()) {
       setQuestions([
         ...questions,
         {
           ...newQuestion,
-          id: Date.now(),
+          id: Date.now(), 
         },
       ]);
       setNewQuestion({
+        id: Date.now(),
         type: "text",
         question: "",
         required: false,
@@ -121,7 +157,9 @@ const CreateApplication = () => {
       });
     }
   };
-  const handleRemoveQuestion = (id) => {
+
+
+  const handleRemoveQuestion = (id: number) => {
     const questionToRemove = questions.find((q) => q.id === id);
     if (questionToRemove) {
       setUsedQuestions((prev) => {
@@ -134,7 +172,7 @@ const CreateApplication = () => {
           ...prev,
         };
         Object.keys(newQuestions).forEach((category) => {
-          if (fullQuestionPool[category].includes(questionToRemove.question)) {
+          if (fullQuestionPool[category as keyof typeof fullQuestionPool].includes(questionToRemove.question)) {
             newQuestions[category] = [
               ...newQuestions[category],
               questionToRemove.question,
@@ -146,7 +184,9 @@ const CreateApplication = () => {
     }
     setQuestions(questions.filter((q) => q.id !== id));
   };
-  const handleOptionChange = (questionId, optionIndex, value) => {
+
+
+  const handleOptionChange = (questionId: number, optionIndex: number, value: string) => {
     setQuestions(
       questions.map((q) => {
         if (q.id === questionId) {
@@ -161,7 +201,9 @@ const CreateApplication = () => {
       })
     );
   };
-  const handleAddOption = (questionId) => {
+
+
+  const handleAddOption = (questionId: number) => {
     setQuestions(
       questions.map((q) => {
         if (q.id === questionId) {
@@ -174,7 +216,9 @@ const CreateApplication = () => {
       })
     );
   };
-  const handleRemoveOption = (questionId, optionIndex) => {
+
+
+  const handleRemoveOption = (questionId: number, optionIndex: number) => {
     setQuestions(
       questions.map((q) => {
         if (q.id === questionId) {
@@ -190,7 +234,9 @@ const CreateApplication = () => {
       })
     );
   };
-  const addSuggestedQuestion = (question, category) => {
+
+
+  const addSuggestedQuestion = (question: string, category: QuestionCategories) => {
     if (!usedQuestions.has(question)) {
       setQuestions([
         ...questions,
@@ -209,7 +255,9 @@ const CreateApplication = () => {
       }));
     }
   };
-  const PreviewModal = ({ isOpen, onClose }) => {
+
+
+  const PreviewModal: React.FC<PreviewModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -312,7 +360,7 @@ const CreateApplication = () => {
                       <textarea
                         disabled
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                        rows="3"
+                        rows={3}
                         placeholder="Enter your answer"
                       />
                     )}
@@ -496,7 +544,7 @@ const CreateApplication = () => {
                   onChange={(e) =>
                     setNewQuestion({
                       ...newQuestion,
-                      type: e.target.value,
+                      type: e.target.value as QuestionType,
                     })
                   }
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -619,7 +667,7 @@ const CreateApplication = () => {
                     {items.map((question) => (
                       <button
                         key={question}
-                        onClick={() => addSuggestedQuestion(question, category)}
+                        onClick={() => addSuggestedQuestion(question, category as QuestionCategories)}
                         className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition-colors duration-200"
                       >
                         {question}

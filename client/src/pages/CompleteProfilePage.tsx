@@ -14,7 +14,19 @@ import {
   StarIcon,
   PlusIcon,
   XIcon,
+  User,
 } from "lucide-react";
+
+type Category =
+  | "extracurriculars"
+  | "clubs"
+  | "hobbies"
+  | "awards"
+  | "volunteer";
+
+interface InputValues {
+  [key: string]: string;
+}
 
 const SuggestionBubble = ({ text, onClick }: any) => (
   <button
@@ -25,6 +37,7 @@ const SuggestionBubble = ({ text, onClick }: any) => (
     <span className="text-sm">{text}</span>
   </button>
 );
+
 const SelectedBubble = ({ text, onRemove }: any) => (
   <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-teal-300 bg-white text-teal-700 shadow-sm">
     <span className="text-sm font-medium">{text}</span>
@@ -35,14 +48,16 @@ const SelectedBubble = ({ text, onRemove }: any) => (
 );
 
 const CompleteProfilePage = () => {
-  const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [step, setStep] = useState(1);
-  const [selectedExtracurriculars, setSelectedExtracurriculars] = useState([]);
-  const [selectedClubs, setSelectedClubs] = useState([]);
-  const [selectedHobbies, setSelectedHobbies] = useState([]);
-  const [selectedAwards, setSelectedAwards] = useState([]);
-  const [selectedVolunteer, setSelectedVolunteer] = useState([]);
-  const [inputValues, setInputValues] = useState({
+  const [selectedExtracurriculars, setSelectedExtracurriculars] = useState<
+    string[]
+  >([]);
+  const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
+  const [selectedAwards, setSelectedAwards] = useState<string[]>([]);
+  const [selectedVolunteer, setSelectedVolunteer] = useState<string[]>([]);
+  const [inputValues, setInputValues] = useState<InputValues>({
     extracurriculars: "",
     clubs: "",
     hobbies: "",
@@ -78,7 +93,12 @@ const CompleteProfilePage = () => {
       "Teaching Assistant",
     ],
   };
-  const handleAdd = (item, category, isManualInput = false) => {
+
+  const handleAdd = (
+    item: string,
+    category: Category,
+    isManualInput = false
+  ) => {
     let newItem = isManualInput ? inputValues[category] : item;
     if (!newItem.trim()) return;
     const updateState = {
@@ -103,7 +123,8 @@ const CompleteProfilePage = () => {
       [category]: "",
     });
   };
-  const handleRemove = (item, category) => {
+
+  const handleRemove = (item: string, category: Category) => {
     const updateState = {
       extracurriculars: setSelectedExtracurriculars,
       clubs: setSelectedClubs,
@@ -120,68 +141,96 @@ const CompleteProfilePage = () => {
     };
     updateState[category](currentState[category].filter((i) => i !== item));
   };
-  const handleInputChange = (e, category) => {
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    category: Category
+  ) => {
     setInputValues({
       ...inputValues,
       [category]: e.target.value,
     });
   };
-  const handleKeyPress = (e, category) => {
+
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    category: Category
+  ) => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleAdd("", category, true);
     }
   };
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result);
+        if (typeof reader.result === "string") {
+          setProfileImage(reader.result);
+        }
       };
       reader.readAsDataURL(file);
     }
   };
-  const renderInput = (category, icon, placeholder) => (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3 p-4 rounded-full border border-gray-200 bg-white hover:border-teal-300 transition-colors">
-        {icon}
-        <input
-          type="text"
-          className="flex-1 border-none focus:outline-none bg-transparent text-teal-600 placeholder-gray-400"
-          placeholder={placeholder}
-          value={inputValues[category]}
-          onChange={(e) => handleInputChange(e, category)}
-          onKeyPress={(e) => handleKeyPress(e, category)}
-        />
-      </div>
-      <div className="flex flex-wrap gap-2 pl-12">
-        {eval(
-          `selected${category.charAt(0).toUpperCase() + category.slice(1)}`
-        ).map((item, index) => (
-          <SelectedBubble
-            key={`selected-${index}`}
-            text={item}
-            onRemove={() => handleRemove(item, category)}
+
+  const renderInput = (
+    category: Category,
+    icon: React.ReactNode,
+    placeholder: string
+  ) => {
+    const selectedItems = {
+      extracurriculars: selectedExtracurriculars,
+      clubs: selectedClubs,
+      hobbies: selectedHobbies,
+      awards: selectedAwards,
+      volunteer: selectedVolunteer,
+    };
+    const categorySelectedItems = selectedItems[category] || [];
+    const categorySuggestions = suggestions[category] || [];
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 p-4 rounded-full border border-gray-200 bg-white hover:border-teal-300 transition-colors">
+          {icon}
+          <input
+            type="text"
+            className="flex-1 border-none focus:outline-none bg-transparent text-teal-600 placeholder-gray-400"
+            placeholder={placeholder}
+            value={inputValues[category]}
+            onChange={(e) => handleInputChange(e, category)}
+            onKeyPress={(e) => handleKeyPress(e, category)}
           />
-        ))}
+        </div>
+        <div className="flex flex-wrap gap-2 pl-12">
+          {categorySelectedItems.map((item, index: number) => (
+            <SelectedBubble
+              key={`selected-${index}`}
+              text={item}
+              onRemove={() => handleRemove(item, category)}
+            />
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2 pl-12">
+          {suggestions[category].map(
+            (item, index) =>
+              !eval(
+                `selected${
+                  category.charAt(0).toUpperCase() + category.slice(1)
+                }`
+              ).includes(item) && (
+                <SuggestionBubble
+                  key={`suggestion-${index}`}
+                  text={item}
+                  onClick={() => handleAdd(item, category)}
+                />
+              )
+          )}
+        </div>
       </div>
-      <div className="flex flex-wrap gap-2 pl-12">
-        {suggestions[category].map(
-          (item, index) =>
-            !eval(
-              `selected${category.charAt(0).toUpperCase() + category.slice(1)}`
-            ).includes(item) && (
-              <SuggestionBubble
-                key={`suggestion-${index}`}
-                text={item}
-                onClick={() => handleAdd(item, category)}
-              />
-            )
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen w-full bg-white">
