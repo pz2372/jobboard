@@ -21,7 +21,7 @@ import EmployerSignup from './pages/employer/EmployerSignup';
 import EmployerLogin from './pages/employer/EmployerLogin';
 
 const App = () => {
-console.log("hi")
+
   return (
     <Router>
       <div className="w-full min-h-screen bg-teal-50">

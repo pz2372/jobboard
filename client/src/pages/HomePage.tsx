@@ -92,6 +92,8 @@ const HomePage = () => {
     <div className="w-full">
       {/* Previous sections remain unchanged */}
 
+      <div className="bg-red-500 p-4 right-0 text-red">Tailwind Test</div>
+
       {/* Statistics Section */}
       <section id="stats-section" className="py-20 bg-white animate-on-scroll">
         <div className="max-w-7xl mx-auto px-4">
@@ -212,55 +214,55 @@ const HomePage = () => {
         </div>
       </section>
 
-        {/* Employer Section */}
-        <section className="bg-gradient-to-br from-teal-50 via-white to-teal-50 py-20 animate-on-scroll">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-800 mb-4">
-                Hire Top Student Talent
-              </h2>
-              <p className="text-xl text-gray-600">
-                Connect with motivated students and recent graduates ready to
-                contribute to your success
+      {/* Employer Section */}
+      <section className="bg-gradient-to-br from-teal-50 via-white to-teal-50 py-20 animate-on-scroll">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+              Hire Top Student Talent
+            </h2>
+            <p className="text-xl text-gray-600">
+              Connect with motivated students and recent graduates ready to
+              contribute to your success
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                <Target className="w-6 h-6 text-teal-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Targeted Matching
+              </h3>
+              <p className="text-gray-600">
+                Find candidates that perfectly match your requirements through
+                our advanced matching system
               </p>
             </div>
-
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
-              <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
-                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
-                  <Target className="w-6 h-6 text-teal-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  Targeted Matching
-                </h3>
-                <p className="text-gray-600">
-                  Find candidates that perfectly match your requirements through
-                  our advanced matching system
-                </p>
+            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                <div className="w-6 h-6 text-teal-600" />
               </div>
-              <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
-                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
-                  <div className="w-6 h-6 text-teal-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  Efficient Hiring
-                </h3>
-                <p className="text-gray-600">
-                  Streamlined recruitment process saving you time and resources
-                </p>
-              </div>
-              <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
-                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
-                  <Shield className="w-6 h-6 text-teal-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  Quality Assured
-                </h3>
-                <p className="text-gray-600">
-                  Pre-screened candidates with verified academic credentials
-                </p>
-              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Efficient Hiring
+              </h3>
+              <p className="text-gray-600">
+                Streamlined recruitment process saving you time and resources
+              </p>
             </div>
+            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                <Shield className="w-6 h-6 text-teal-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Quality Assured
+              </h3>
+              <p className="text-gray-600">
+                Pre-screened candidates with verified academic credentials
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -284,7 +286,6 @@ const HomePage = () => {
           </form>
         </div>
       </section>
-
     </div>
   );
 };

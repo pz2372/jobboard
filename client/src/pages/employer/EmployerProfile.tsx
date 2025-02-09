@@ -21,8 +21,15 @@ type companyInfo = {
 
 const EmployerProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [originalInfo, setOriginalInfo] = useState<companyInfo | null>(null);
-  const [companyInfo, setCompanyInfo] = useState<companyInfo | null>({
+  const [originalInfo, setOriginalInfo] = useState<companyInfo>({
+    name: "",
+    location: "",
+    website: "",
+    description: "",
+    email: "",
+    phone: "",
+  });
+  const [companyInfo, setCompanyInfo] = useState<companyInfo>({
     name: "Tech Solutions Inc.",
     location: "San Francisco, CA",
     website: "techsolutions.com",

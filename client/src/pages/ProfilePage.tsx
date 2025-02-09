@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, ReactNode } from "react"
 import {
   PlusIcon,
   GraduationCapIcon,
@@ -37,6 +37,7 @@ type SuggestionSection =
     [key in SuggestionSection]?: string;
   };
 
+
   const suggestions: { [key in SuggestionSection]: string[] } = {
     education: ["Bachelor's Degree", "Master's Degree", "High School Diploma", "Certification"],
     extracurriculars: ["Student Government", "Drama Club", "Debate Team", "Sports Team"],
@@ -45,6 +46,7 @@ type SuggestionSection =
     work: ["Internship", "Part-time Job", "Summer Position", "Research Assistant"],
     awards: ["Dean's List", "Academic Excellence", "Leadership Award", "Sports Achievement"],
     volunteer: ["Community Service", "Food Bank", "Animal Shelter", "Environmental Projects"],
+    bio:[]
   };
 
 type SelectedItems = Record<string, any[]>;
@@ -85,7 +87,8 @@ const ProfilePage = () => {
   };
 
   const handleAdd = (section: string, value?: string) => {
-    const itemToAdd = value ?? inputValues[section]; // Default to input value if not provided
+    const itemToAdd = value ?? inputValues[section as keyof InputValues];
+
     if (!itemToAdd) return; // Ensure value exists
   
     setSelectedItems((prev) => ({
@@ -127,7 +130,7 @@ const ProfilePage = () => {
 
   const renderSection = (
     title: string,
-    icon: JSX.Element,
+    icon: ReactNode,
     section: SuggestionSection,
     placeholder: string
   ) => (
