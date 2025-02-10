@@ -25,6 +25,8 @@ import {
   Award,
   Users,
   Building,
+  Heater,
+  LampFloor,
   Globe,
   Linkedin,
   Target,
@@ -37,8 +39,53 @@ import {
   Smartphone,
   Factory,
   Coffee,
+  UserPlus,
+  Send
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import SearchBar from "components/SearchBar";
+import Footer from "components/Footer";
+import AmazonLogo from '../images/amazon.png';
+import HarrisLogo from '../images/harris.png';
+import McDonaldsLogo from '../images/mcdonalds.png';
+import NikeLogo from '../images/nike.png';
+import WalmartLogo from '../images/walmart.png';
+import { Link } from "react-router-dom";
+
+const categories = [
+  {
+    icon: Heater,
+    title: "Restaurant",
+  },
+  {
+    icon: Briefcase,
+    title: "Warehouse",
+  },
+  {
+    icon: LampFloor,
+    title: "Retail",
+  },
+  {
+    icon: PenTool,
+    title: "Customer Service",
+  },
+  {
+    icon: Smartphone,
+    title: "Sales",
+  },
+  {
+    icon: Factory,
+    title: "Factory",
+  },
+  {
+    icon: Coffee,
+    title: "Cafe",
+  },
+  {
+    icon: Globe,
+    title: "Education",
+  },
+]
 
 const HomePage = () => {
   const [counters, setCounters] = useState({
@@ -71,10 +118,10 @@ const HomePage = () => {
     const duration = 2000;
     const steps = 50;
     const targetValues = {
-      students: 50000,
-      employers: 2500,
-      placements: 15000,
-      satisfaction: 98,
+      students: 1000,
+      employers: 500,
+      placements: 500,
+      satisfaction: 99,
     };
     let step = 0;
     const interval = setInterval(() => {
@@ -88,16 +135,24 @@ const HomePage = () => {
       if (step === steps) clearInterval(interval);
     }, duration / steps);
   };
+
   return (
     <div className="w-full">
-      {/* Previous sections remain unchanged */}
+      <div className="text-center mb-14 mt-8">
+        <h1 className="text-5xl font-bold mb-4 text-gray-800">
+          Find Your Perfect Student Job
+        </h1>
+        <p className="text-xl text-gray-600 mb-8">
+          Connect with employers who value student talent
+        </p>
+      </div>
 
-      <div className="bg-red-500 p-4 right-0 text-red">Tailwind Test</div>
+      <SearchBar />
 
       {/* Statistics Section */}
       <section id="stats-section" className="py-20 bg-white animate-on-scroll">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <GraduationCapIcon className="w-8 h-8 text-teal-600" />
@@ -114,7 +169,7 @@ const HomePage = () => {
               <div className="text-4xl font-bold text-teal-600 mb-2">
                 {counters.employers}+
               </div>
-              <div className="text-gray-600">Partner Companies</div>
+              <div className="text-gray-600">Companies</div>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -138,47 +193,33 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Trust Badges */}
+      <section className="py-16 bg-white animate-on-scroll mt-10 mb-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl font-bold text-center text-gray-600 mb-12">
+            Trusted By Leading Companies
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+            {[AmazonLogo, NikeLogo, McDonaldsLogo, HarrisLogo, WalmartLogo].map((logo, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-center"
+              >
+                <img src={logo} className="h-[70px]"/>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Industry Categories */}
       <section className="py-20 bg-gray-50 animate-on-scroll">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
             Popular Industries
           </h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              {
-                icon: Code,
-                title: "Technology",
-              },
-              {
-                icon: Briefcase,
-                title: "Business",
-              },
-              {
-                icon: HeartPulse,
-                title: "Healthcare",
-              },
-              {
-                icon: PenTool,
-                title: "Design",
-              },
-              {
-                icon: Smartphone,
-                title: "Mobile",
-              },
-              {
-                icon: Factory,
-                title: "Manufacturing",
-              },
-              {
-                icon: Coffee,
-                title: "Hospitality",
-              },
-              {
-                icon: Globe,
-                title: "Education",
-              },
-            ].map((industry, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {categories.map((industry, index) => (
               <div
                 key={index}
                 className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer group"
@@ -195,27 +236,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="py-16 bg-white animate-on-scroll">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center text-gray-600 mb-12">
-            Trusted By Leading Companies
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity"
-              >
-                <div className="w-32 h-12 bg-gray-200 rounded-lg"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Employer Section */}
-      <section className="bg-gradient-to-br from-teal-50 via-white to-teal-50 py-20 animate-on-scroll">
+      <section className=" py-10 animate-on-scroll">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">
@@ -242,7 +264,7 @@ const HomePage = () => {
             </div>
             <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
-                <div className="w-6 h-6 text-teal-600" />
+                <UserPlus className="w-6 h-6 text-teal-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">
                 Efficient Hiring
@@ -266,6 +288,43 @@ const HomePage = () => {
         </div>
       </section>
 
+      <section>
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-16">
+          <div className=" items-center text-center">
+            <h3 className="text-3xl font-bold text-gray-800 mb-4">
+              Ready to Transform Your Hiring?
+            </h3>
+            <p className="text-gray-600 mb-8">
+              Join thousands of employers who have found their perfect
+              candidates through our platform
+            </p>
+            <div className="grid grid-cols-3 gap-4 mb-8 pr-[15%] pl-[15%]">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-teal-600 mb-2">99%</div>
+                <div className="text-sm text-gray-600">
+                  Placement Success Rate
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-teal-600 mb-2">$0</div>
+                <div className="text-sm text-gray-600">Cost to hire</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-teal-600 mb-2">
+                  96hrs
+                </div>
+                <div className="text-sm text-gray-600">
+                  Average Time to Hire
+                </div>
+              </div>
+            </div>
+            <button className="max-w-[900px] mx-auto px-8 py-4 bg-teal-600 text-white rounded-full hover:bg-teal-500 transition-all hover:shadow-xl flex items-center justify-center gap-2 text-lg font-semibold">
+              Get Started Now <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Newsletter */}
       <section className="py-20 bg-teal-600 animate-on-scroll">
         <div className="max-w-3xl mx-auto px-4 text-center">
@@ -280,12 +339,16 @@ const HomePage = () => {
               placeholder="Enter your email"
               className="flex-1 px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
-            <button className="px-8 py-4 bg-white text-teal-600 rounded-full hover:bg-teal-50 transition-colors font-semibold">
-              Subscribe
+            <Link to="/employer/signup">
+            <button className="px-8 py-4 bg-white text-teal-600 rounded-full hover:bg-teal-50 transition-colors font-semibold flex items-center justify-center">
+              Subscribe <Send className="w-5 h-5 mx-1"/>
             </button>
+            </Link>
           </form>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 };

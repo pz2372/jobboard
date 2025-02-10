@@ -41,41 +41,51 @@ import {
   Phone,
   MapPinIcon,
 } from "lucide-react";
+import Logo from "../images/footer_logo.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-50 pt-16 pb-8 animate-on-scroll">
+    <footer className="bg-teal-50 pt-10 pb-8 animate-on-scroll">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
+        <div className="grid md:grid-cols-5 gap-12 mb-12">
           {/* Company Info */}
           <div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">
-              JobConnect
+            <h3 className="text-2xl font-bold text-gray-800">
+              <img src={Logo} className="w-[100px]" />
             </h3>
             <div className="space-y-4">
-              <p className="text-gray-600">
+              <p className="text-gray-600 ml-2">
                 Connecting talent with opportunities, bridging the gap between
                 education and employment.
               </p>
             </div>
           </div>
 
-          {/* Information */}
+          <div></div>
           <div>
+            <button className="w-[100%] mb-5 py-4 bg-teal-600 text-white rounded-full hover:bg-teal-500 transition-all hover:shadow-xl flex items-center justify-center gap-2 text-lg font-semibold">
+              User Login
+            </button>
+          
+            <button className="w-[100%] py-4 bg-teal-600 text-white rounded-full hover:bg-teal-500 transition-all hover:shadow-xl flex items-center justify-center gap-2 text-lg font-semibold">
+              Employer Login
+            </button>
+          </div>
+
+          {/* Information */}
+          <div className="mx-auto">
             <h3 className="text-lg font-semibold text-gray-800 mb-6">
               Information
             </h3>
             <ul className="space-y-3">
               {[
-                "About Us",
-                "Contact",
+                "User Agreement",
                 "Terms & Conditions",
                 "Privacy Policy",
-                "Press & Media",
+                "Cookie Policy",
               ].map((item) => (
                 <li key={item}>
                   <a className="text-gray-600 hover:text-teal-600 transition-colors flex items-center">
-                    <ChevronRight className="w-4 h-4 mr-2" />
                     {item}
                   </a>
                 </li>
@@ -84,13 +94,12 @@ const Footer = () => {
           </div>
 
           {/* Resources */}
-          <div>
+          <div className="mx-auto">
             <h3 className="text-lg font-semibold text-gray-800 mb-6">
               Resources
             </h3>
             <ul className="space-y-3">
               {[
-                "Career Guide",
                 "Interview Tips",
                 "Resume Builder",
                 "Job Search Tips",
@@ -98,7 +107,6 @@ const Footer = () => {
               ].map((item) => (
                 <li key={item}>
                   <a className="text-gray-600 hover:text-teal-600 transition-colors flex items-center">
-                    <ChevronRight className="w-4 h-4 mr-2" />
                     {item}
                   </a>
                 </li>

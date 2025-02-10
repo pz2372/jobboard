@@ -22,7 +22,6 @@ import {
 import React, { useState } from "react";
 import SearchBar from "../components/SearchBar";
 
-
 const JobPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -94,19 +93,9 @@ const JobPage = () => {
     },
   ];
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8">
-      <div className="text-center mb-12 animate-fade-in relative">
-        <h1 className="text-4xl font-bold mb-4 text-teal-600 font-comic tracking-wide">
-          Start Your Journey
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Your perfect first job is waiting for you
-        </p>
-      </div>
-
-< SearchBar/>
-
+    <>
       <div className="relative">
+        <SearchBar />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-12">
           {jobs.map((job, index) => (
             <div
@@ -159,52 +148,24 @@ const JobPage = () => {
             </div>
           ))}
         </div>
-
-        {!isLoggedIn && jobs.length > 4 && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white/95 to-transparent h-[400px] rounded-b-2xl flex items-end justify-center pb-12">
-            <div className="text-center p-8 bg-gradient-to-r from-teal-500/10 to-teal-600/10 backdrop-blur-md rounded-3xl shadow-2xl border border-teal-100">
-              <Lock className="w-8 h-8 text-teal-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-teal-800 mb-3">
-                Unlock Your Future
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Join now to access all job listings and start building your
-                career path with personalized recommendations
-              </p>
-              <button
-                onClick={() => setIsLoggedIn(true)}
-                className="bg-teal-600 text-white px-8 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2 mx-auto"
-              >
-                Get Started Now
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-3xl p-12 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNTYiIGhlaWdodD0iMTAwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNMjggNjZMMCA1MEwyOCAzNGwyOCAxNkwyOCA2NnpNMjggMzRMMCA1MGwyOCAxNiAyOC0xNkwyOCAzNHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNncmlkKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==')] opacity-50" />
         <div className="relative z-10">
-          <div className="flex justify-center gap-6 mb-8">
-            <Users className="w-8 h-8 text-white" />
-            <MessageCircle className="w-8 h-8 text-white" />
-            <Globe2 className="w-8 h-8 text-white" />
-          </div>
           <h2 className="text-3xl font-bold mb-4 text-white font-comic">
-            Join Our Growing Community
+            Join For More Opportunities
           </h2>
           <p className="text-teal-50 mb-8 text-lg max-w-2xl mx-auto">
             Connect with fellow job seekers, share experiences, and get insider
             tips from industry professionals
           </p>
           <button className="bg-white text-teal-600 px-10 py-4 rounded-full hover:bg-teal-50 transition-all duration-300 transform hover:scale-105 mx-auto flex items-center gap-2 font-semibold shadow-lg">
-            Join the Network
-            <Network className="w-5 h-5" />
+            Join Now
           </button>
         </div>
       </div>
-    </main>
+    </>
   );
 };
 

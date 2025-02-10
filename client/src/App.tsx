@@ -24,7 +24,7 @@ const App = () => {
 
   return (
     <Router>
-      <div className="w-full min-h-screen bg-teal-50">
+      <div className="w-full bg-teal-50">
         <NavBar  />
 
         <main className="max-w-7xl mx-auto px-4 py-8">
