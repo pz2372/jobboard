@@ -12,7 +12,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const JobModal = () => {
+const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -27,7 +27,7 @@ const JobModal = () => {
                 <span>Local Bookstore</span>
               </div>
             </div>
-            <button className="text-gray-400 hover:text-gray-600 transition-colors">
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -123,4 +123,4 @@ const JobModal = () => {
   );
 };
 
-export default JobModal
+export default JobModal;

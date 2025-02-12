@@ -7,10 +7,10 @@ import {
   EyeIcon,
   EyeOffIcon,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const SignupPage = () => {
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 text-teal-600 font-comic tracking-wide">
@@ -82,9 +82,9 @@ const SignupPage = () => {
                 />
                 <span className="text-gray-600">Remember me</span>
               </label>
-              <a className="text-teal-600 hover:text-teal-500">
-                Forgot password?
-              </a>
+              <Link to="forgotpassword" className="text-teal-600 hover:text-teal-500">
+                Forgot password
+              </Link>
             </div>
 
             <button className="w-full bg-teal-600 text-white px-8 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105">
@@ -95,14 +95,13 @@ const SignupPage = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-600">
               Don't have an account?{" "}
-              <a className="text-teal-600 hover:text-teal-500 font-medium">
+              <Link to="/signup" className="text-teal-600 hover:text-teal-500 font-medium">
                 Sign up
-              </a>
+              </Link>
             </p>
           </div>
         </div>
       </div>
-    </main>
   );
 };
 

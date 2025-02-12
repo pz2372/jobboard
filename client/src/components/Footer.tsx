@@ -42,6 +42,7 @@ import {
   MapPinIcon,
 } from "lucide-react";
 import Logo from "../images/footer_logo.png";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -62,18 +63,22 @@ const Footer = () => {
           </div>
 
           <div></div>
-          <div>
+          <div className="pt-5">
+            <Link to="/login">
             <button className="w-[100%] mb-5 py-4 bg-teal-600 text-white rounded-full hover:bg-teal-500 transition-all hover:shadow-xl flex items-center justify-center gap-2 text-lg font-semibold">
               User Login
             </button>
+            </Link>
           
+          <Link to="employer/login">
             <button className="w-[100%] py-4 bg-teal-600 text-white rounded-full hover:bg-teal-500 transition-all hover:shadow-xl flex items-center justify-center gap-2 text-lg font-semibold">
               Employer Login
             </button>
+            </Link>
           </div>
 
           {/* Information */}
-          <div className="mx-auto">
+          <div className="pt-2 mx-auto">
             <h3 className="text-lg font-semibold text-gray-800 mb-6">
               Information
             </h3>
@@ -94,7 +99,7 @@ const Footer = () => {
           </div>
 
           {/* Resources */}
-          <div className="mx-auto">
+          <div className="pt-2 mx-auto">
             <h3 className="text-lg font-semibold text-gray-800 mb-6">
               Resources
             </h3>

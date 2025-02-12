@@ -150,7 +150,7 @@ const HomePage = () => {
       <SearchBar />
 
       {/* Statistics Section */}
-      <section id="stats-section" className="py-20 bg-white animate-on-scroll">
+      <section id="stats-section" className="rounded-3xl py-20 bg-white animate-on-scroll">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
@@ -194,7 +194,7 @@ const HomePage = () => {
       </section>
 
       {/* Trust Badges */}
-      <section className="py-16 bg-white animate-on-scroll mt-10 mb-10">
+      <section className="rounded-3xl py-16 bg-white animate-on-scroll mt-10 mb-10">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-center text-gray-600 mb-12">
             Trusted By Leading Companies
@@ -213,7 +213,7 @@ const HomePage = () => {
       </section>
 
       {/* Industry Categories */}
-      <section className="py-20 bg-gray-50 animate-on-scroll">
+      <section className="rounded-3xl py-20 bg-gray-50 animate-on-scroll">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
             Popular Industries
@@ -326,7 +326,7 @@ const HomePage = () => {
       </section>
 
       {/* Newsletter */}
-      <section className="py-20 bg-teal-600 animate-on-scroll">
+      <section className="rounded-3xl py-20 bg-teal-600 animate-on-scroll">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
           <p className="text-teal-100 mb-8">

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NavBar from './components/NavBar';
+import ProtectedRoute from 'components/ProtectedRoute';
 
 import HomePage from './pages/HomePage';
 import JobPage from './pages/JobPage';
@@ -37,13 +38,13 @@ const App = () => {
             <Route path="/terms" element={<TermsPage />} /> 
 
             {/* Protected Routes */}
-            {/*<Route element={<ProtectedRoute />}>*/}
+            <Route element={<ProtectedRoute />}>
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/completeprofile" element={<CompleteProfilePage />} />
               <Route path="/jobapplication" element={<ApplicationPage />} />
               {/*<Route path="/application" element={<Application />} />*/}
-            {/*</Route>*/}
+            </Route>
 
             {/* Employer Routes */}
             {/*<Route element={<EmployerRoute />}>*/}
