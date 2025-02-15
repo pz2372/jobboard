@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   MapPin,
@@ -15,9 +15,56 @@ import {
   XIcon,
   AlertCircleIcon,
 } from "lucide-react";
+import axiosInstance from "axiosInstance";
+import { RootState } from "redux/store";
+import { useSelector } from "react-redux";
+import SavedJobCard from "../components/SavedJobCard";
+import AppliedJobCard from "components/AppliedJobCard";
+
+interface SavedJob {
+  title: string;
+  company: string;
+  location: string;
+  minWage: number;
+  maxWage: number;
+  savedDate: string;
+}
+
+interface AppliedJob {
+  title: string;
+  company: string;
+  location: string;
+  minWage: number;
+  maxWage: number;
+  appliedDate: string;
+  status: string;
+}
 
 const HistoryPage = () => {
   const [activeTab, setActiveTab] = useState("saved");
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
+  const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    axiosInstance
+      .get(`/savedjobs/${user.id}`)
+      .then((response) => {
+        setSavedJobs(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    axiosInstance
+      .get(`/applications/user/${user.id}`)
+      .then((response) => {
+        setAppliedJobs(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, [user.id]);
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
@@ -41,7 +88,7 @@ const HistoryPage = () => {
             <BookmarkIcon className="w-5 h-5" />
             Saved Jobs
             <span className="ml-2 bg-white/20 px-2 py-0.5 rounded-full text-sm">
-              3
+              {savedJobs.length}
             </span>
           </button>
           <button
@@ -55,7 +102,7 @@ const HistoryPage = () => {
             <CheckCircleIcon className="w-5 h-5" />
             Applied Jobs
             <span className="ml-2 bg-white/20 px-2 py-0.5 rounded-full text-sm">
-              4
+              {appliedJobs.length}
             </span>
           </button>
         </div>
@@ -63,155 +110,16 @@ const HistoryPage = () => {
 
       {activeTab === "saved" && (
         <div className="space-y-4">
-          {[
-            {
-              title: "Junior Web Developer",
-              company: "Tech Solutions Inc",
-              location: "Remote",
-              salary: "$60-75k/year",
-              savedDate: "2 days ago",
-            },
-            {
-              title: "UX Designer",
-              company: "Creative Studio",
-              location: "New York, NY",
-              salary: "$70-85k/year",
-              savedDate: "1 week ago",
-            },
-            {
-              title: "Product Manager",
-              company: "Startup Hub",
-              location: "San Francisco, CA",
-              salary: "$90-110k/year",
-              savedDate: "2 weeks ago",
-            },
-          ].map((job, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-xl transition-all duration-300 border border-gray-200"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg mb-1 text-teal-600">
-                    {job.title}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-gray-500" />
-                    <p className="text-gray-600">{job.company}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ClockIcon className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-500">{job.savedDate}</span>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="text-gray-600 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-gray-500" />
-                  <span>{job.location}</span>
-                </div>
-                <div className="text-gray-600 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-gray-500" />
-                  <span>{job.salary}</span>
-                </div>
-              </div>
-              <div className="flex gap-2 mt-6">
-                <button className="flex-1 bg-teal-50 text-teal-600 px-4 py-3 rounded-xl hover:bg-teal-100 transition-all duration-300 font-medium flex items-center justify-center gap-2">
-                  Apply Now
-                  <Send className="w-4 h-4" />
-                </button>
-                <button className="px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-all duration-300">
-                  <XIcon className="w-4 h-4 text-gray-400" />
-                </button>
-              </div>
-            </div>
+          {savedJobs.map((job, index) => (
+            <SavedJobCard job={job} index={index} key={index}/>
           ))}
         </div>
       )}
 
       {activeTab === "applied" && (
         <div className="space-y-4">
-          {[
-            {
-              title: "Frontend Developer",
-              company: "Web Corp",
-              location: "Austin, TX",
-              salary: "$65-80k/year",
-              status: "Under Review",
-              appliedDate: "1 day ago",
-            },
-            {
-              title: "Software Engineer",
-              company: "Tech Giants",
-              location: "Seattle, WA",
-              salary: "$85-100k/year",
-              status: "Interviewing",
-              appliedDate: "3 days ago",
-            },
-            {
-              title: "UI Developer",
-              company: "Design Lab",
-              location: "Los Angeles, CA",
-              salary: "$70-90k/year",
-              status: "Rejected",
-              appliedDate: "1 week ago",
-            },
-            {
-              title: "Full Stack Developer",
-              company: "Startup X",
-              location: "Miami, FL",
-              salary: "$75-95k/year",
-              status: "Pending",
-              appliedDate: "2 weeks ago",
-            },
-          ].map((job, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-xl transition-all duration-300 border border-gray-200"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg mb-1 text-teal-600">
-                    {job.title}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-gray-500" />
-                    <p className="text-gray-600">{job.company}</p>
-                  </div>
-                </div>
-                <span
-                  className={`text-sm px-3 py-1 rounded-full font-medium ${
-                    job.status === "Under Review"
-                      ? "bg-blue-50 text-blue-600"
-                      : job.status === "Interviewing"
-                      ? "bg-green-50 text-green-600"
-                      : job.status === "Rejected"
-                      ? "bg-red-50 text-red-600"
-                      : "bg-yellow-50 text-yellow-600"
-                  }`}
-                >
-                  {job.status}
-                </span>
-              </div>
-              <div className="space-y-3">
-                <div className="text-gray-600 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-gray-500" />
-                  <span>{job.location}</span>
-                </div>
-                <div className="text-gray-600 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-gray-500" />
-                  <span>{job.salary}</span>
-                </div>
-                <div className="text-gray-600 flex items-center gap-2">
-                  <ClockIcon className="w-4 h-4 text-gray-500" />
-                  <span>Applied {job.appliedDate}</span>
-                </div>
-              </div>
-              <button className="w-full mt-6 bg-gray-50 text-gray-600 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-300 font-medium flex items-center justify-center gap-2">
-                View Application
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+          {appliedJobs.map((job, index) => (
+            <AppliedJobCard job={job} index={index} key={index}/>
           ))}
         </div>
       )}

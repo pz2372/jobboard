@@ -68,7 +68,6 @@ const ProfilePage = () => {
     volunteer: [],
   });
 
-  
   useEffect(() => {
     axiosInstance
       .get(`userprofile/${user.id}`)
@@ -92,18 +91,34 @@ const ProfilePage = () => {
       });
   }, [user.id]);
 
-
   const handleSaveProfilePicture = (file: File | null) => {
     if (!file) return;
-
+  
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === "string") {
-        setProfilePicture(reader.result);
+        setProfilePicture(reader.result); 
       }
     };
     reader.readAsDataURL(file);
+  
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    axiosInstance
+      .put(`/userprofile/picture/${user.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",  
+        },
+      })
+      .then((response) => {
+        console.log("Profile picture uploaded successfully", response);
+      })
+      .catch((error) => {
+        console.error("Error uploading profile picture", error);
+      });
   };
+  
 
 
   const handleProfileSectionUpdate = (
@@ -148,7 +163,6 @@ const ProfilePage = () => {
     });
   };
 
-
   const handleSaveProfileSection = async (
     section: SuggestionSection,
     bio?: string
@@ -174,7 +188,6 @@ const ProfilePage = () => {
       console.error(`Error updating ${section}:`, error);
     }
   };
-
 
   return (
     <div className="w-full min-h-screen bg-teal-50">

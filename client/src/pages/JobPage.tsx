@@ -79,7 +79,7 @@ const JobPage = () => {
     <>
       <div className="relative">
         <SearchBar />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid mt-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {jobs.map((job, index) => (
             <JobCard key={index} job={job} index={index} onClick={() => setSelectedJob(job)}/>
           ))}
@@ -94,8 +94,7 @@ const JobPage = () => {
             Join For More Opportunities
           </h2>
           <p className="text-teal-50 mb-8 text-lg max-w-2xl mx-auto">
-            Connect with fellow job seekers, share experiences, and get insider
-            tips from industry professionals
+            Find your opportunity today
           </p>
           <button className="bg-white text-teal-600 px-10 py-4 rounded-full hover:bg-teal-50 transition-all duration-300 transform hover:scale-105 mx-auto flex items-center gap-2 font-semibold shadow-lg">
             Join Now

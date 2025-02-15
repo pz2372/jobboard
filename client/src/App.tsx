@@ -14,7 +14,8 @@ import TermsPage from './pages/TermsPage';
 import ProfilePage from './pages/ProfilePage';
 import HistoryPage from './pages/HistoryPage';
 import CompleteProfilePage from './pages/CompleteProfilePage';
-import ApplicationPage from './pages/employer/ApplicationPage';
+import ApplicationPage from './pages/ApplicationPage';
+import ApplicationSuccessPage from 'pages/ApplicationSuccessPage';
 
 import CreateJob from './pages/employer/CreateJob';
 import EmployerDashboard from './pages/employer/EmployerDashboard';
@@ -42,7 +43,8 @@ const App = () => {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/completeprofile" element={<CompleteProfilePage />} />
-              <Route path="/jobapplication" element={<ApplicationPage />} />
+              <Route path="/jobapplication/:jobId" element={<ApplicationPage />} />
+              <Route path="/applicationsuccess" element={<ApplicationSuccessPage/>} />
               {/*<Route path="/application" element={<Application />} />*/}
             </Route>
 

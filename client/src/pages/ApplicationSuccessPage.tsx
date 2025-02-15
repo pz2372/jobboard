@@ -1,77 +1,102 @@
 import React from "react";
-import { CheckCircle, ArrowLeft } from "lucide-react";
+import {
+  CheckCircle,
+  ArrowLeft,
+  MapPin,
+  Building2,
+  DollarSign,
+  Clock,
+  Search,
+  Home,
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FormatDate } from "components/methods/FormatDate";
 
 const ApplicationSuccessPage = () => {
+  const location = useLocation(); 
+  const job = location.state?.job;
+  const navigate = useNavigate()
+
   return (
-    <main className="min-h-screen bg-gray-50/90 p-4 md:p-8">
-      <div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-sm">
-        <div className="mb-8 text-center">
-          <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-600" />
-          <h1 className="mb-2 text-2xl font-semibold text-gray-900">
-            Application Submitted Successfully!
-          </h1>
-          <p className="text-gray-700">
-            Your application has been received and is being processed
-          </p>
-        </div>
-
-        <div className="mb-8 rounded-lg bg-gray-50 p-4 text-center">
-          <p className="text-sm text-gray-700">Reference Number</p>
-          <p className="text-lg font-medium text-gray-900">APP-2023-89275</p>
-        </div>
-
-        <section className="mb-8">
-          <h2 className="mb-4 text-lg font-medium text-gray-900">
-            Personal Information
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <p className="text-sm text-gray-700">Full Name</p>
-              <p className="font-medium text-gray-900">John Michael Smith</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-700">Student ID</p>
-              <p className="font-medium text-gray-900">STU123456789</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-700">Program</p>
-              <p className="font-medium text-gray-900">Computer Science</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-700">Expected Graduation</p>
-              <p className="font-medium text-gray-900">May 2025</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-4 text-lg font-medium text-gray-900">
-            Application Status
-          </h2>
-          <div className="rounded-lg bg-green-50 p-4">
-            <p className="font-medium text-green-600">Under Review</p>
-            <p className="text-sm text-gray-700">
-              Your application is currently being reviewed by our admissions
-              team
-            </p>
-          </div>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="mb-4 text-lg font-medium text-gray-900">Next Steps</h2>
-          <ul className="list-inside list-disc space-y-2 text-gray-700">
-            <li>Check your email for confirmation details</li>
-            <li>Monitor your application status on the dashboard</li>
-            <li>Prepare required documents for the next phase</li>
-          </ul>
-        </section>
-
-        <button className="inline-flex w-full items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Return to Dashboard
-        </button>
+    <div className="mx-auto max-w-2xl rounded-3xl bg-white p-6 shadow-sm">
+      <div className="mb-4 text-center">
+        <CheckCircle className="mx-auto mb-4 h-12 w-12 text-teal-600" />
+        <h1 className="text-2xl font-bold text-teal-600 font-comic">
+          Application Submitted Successfully!
+        </h1>
+        <p className="text-gray-700 p-3">
+          Your application has been sent to {job.company}
+        </p>
       </div>
-    </main>
+
+      <section className="mb-8">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
+          <h2 className="font-semibold text-lg mb-4 text-gray-900">
+            Application Details
+          </h2>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-600">
+                {job.title} 
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-600">{job.location}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-600">{job.minWage}-{job.maxWage}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-600">Applied on {FormatDate(new Date)}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-8">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-200">
+          <h2 className="font-semibold text-lg mb-4 text-gray-900">
+            Next Steps
+          </h2>
+          <ul className="space-y-3 text-gray-600">
+            <li className="flex items-start gap-3">
+              <div className="bg-teal-50 p-1 rounded-full mt-0.5">
+                <CheckCircle className="w-4 h-4 text-teal-600" />
+              </div>
+              Watch for a confirmation from {job.company}
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="bg-teal-50 p-1 rounded-full mt-0.5">
+                <CheckCircle className="w-4 h-4 text-teal-600" />
+              </div>
+              Review your application status in your dashboard
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="bg-teal-50 p-1 rounded-full mt-0.5">
+                <CheckCircle className="w-4 h-4 text-teal-600" />
+              </div>
+              Prepare for potential interview requests
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <div className="flex gap-4">
+          <button onClick={()=>navigate("/jobs")} className="flex-1 bg-teal-600 text-white px-4 py-3 rounded-xl hover:bg-teal-700 transition-all duration-300 font-medium flex items-center justify-center gap-2">
+          <Search className="w-4 h-4" />
+          Browse More Jobs
+            
+          </button>
+          <button onClick={()=>navigate("/history")} className="flex-1 bg-teal-50 text-teal-600 px-4 py-3 rounded-xl hover:bg-teal-100 transition-all duration-300 font-medium flex items-center justify-center gap-2">
+          <Home className="w-4 h-4" />
+          Go to Dashboard
+          </button>
+        </div>
+    </div>
   );
 };
 
