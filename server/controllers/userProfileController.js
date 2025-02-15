@@ -97,7 +97,10 @@ exports.updateUserProfile = async (req, res) => {
 
     await UserProfile.update(updatedFields, { where: { userId: userId } });
 
-    res.status(200).json({ message: "Profile updated successfully" });
+    res.status(200).json({
+      message: "Profile updated successfully",
+      updatedProfile: userProfile, // Send back updated profile
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });

@@ -48,6 +48,12 @@ const ProfilePage = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [location, setLocation] = useState<string | null>(null);
+  const [bio, setBio] = useState<string>("");
+  const [pendingChanges, setPendingChanges] = useState<
+    Record<string, string | string[]>
+  >({});
+
   type SectionKey = keyof typeof selectedItems;
 
   const user = useSelector((state: RootState) => state.auth.user);
@@ -62,16 +68,30 @@ const ProfilePage = () => {
     volunteer: [],
   });
 
+  
   useEffect(() => {
     axiosInstance
       .get(`userprofile/${user.id}`)
       .then((response) => {
-        console.log(response)
+        const data = response.data;
+        setSelectedItems({
+          education: data.education || [],
+          extracurriculars: data.extracurriculars || [],
+          clubs: data.clubs || [],
+          hobbies: data.hobbies || [],
+          work: data.work || [],
+          awards: data.awards || [],
+          volunteer: data.volunteer || [],
+        });
+        setProfilePicture(data.profileImage);
+        setLocation(data.location);
+        setBio(data.bio);
       })
       .catch((error) => {
         console.error(error);
       });
-  });
+  }, [user.id]);
+
 
   const handleSaveProfilePicture = (file: File | null) => {
     if (!file) return;
@@ -84,6 +104,77 @@ const ProfilePage = () => {
     };
     reader.readAsDataURL(file);
   };
+
+
+  const handleProfileSectionUpdate = (
+    action: string,
+    section: string,
+    value: string
+  ) => {
+    setSelectedItems((prev) => {
+      const updatedSection = Array.isArray(prev[section]) ? prev[section] : [];
+
+      let newItems;
+      if (action === "add") {
+        newItems = [...updatedSection, value];
+      } else if (action === "remove") {
+        newItems = updatedSection.filter((item) => item !== value);
+      } else {
+        newItems = updatedSection;
+      }
+      return {
+        ...prev,
+        [section]: newItems,
+      };
+    });
+
+    setPendingChanges((prev) => {
+      const updatedSection = Array.isArray(prev[section]) ? prev[section] : [];
+
+      let newItems;
+      if (action === "add") {
+        newItems = [...updatedSection, value];
+      } else if (action === "remove") {
+        newItems = updatedSection.filter((item) => item !== value);
+      } else if (action === "bio") {
+        newItems = value;
+      } else {
+        newItems = updatedSection;
+      }
+      return {
+        ...prev,
+        [section]: newItems,
+      };
+    });
+  };
+
+
+  const handleSaveProfileSection = async (
+    section: SuggestionSection,
+    bio?: string
+  ) => {
+    if (!pendingChanges[section]) return;
+
+    try {
+      if (section == "bio") {
+        await axiosInstance.put(`/userprofile/${user.id}`, {
+          [section]: bio,
+        });
+      } else {
+        await axiosInstance.put(`/userprofile/${user.id}`, {
+          [section]: selectedItems[section],
+        });
+      }
+
+      setPendingChanges((prev) => {
+        const { [section]: _, ...rest } = prev;
+        return rest;
+      });
+    } catch (error) {
+      console.error(`Error updating ${section}:`, error);
+    }
+  };
+
 
   return (
     <div className="w-full min-h-screen bg-teal-50">
@@ -125,10 +216,12 @@ const ProfilePage = () => {
             </button>
           </div>
           <div className="text-center md:text-left">
-            <h1 className="text-3xl font-bold text-teal-600 mb-2">{user.firstName} {user.lastName}</h1>
+            <h1 className="text-3xl font-bold text-teal-600 mb-2">
+              {user.firstName} {user.lastName}
+            </h1>
             <div className="flex items-center justify-center md:justify-start gap-2 text-gray-600">
               <MapPin className="w-4 h-4 text-teal-500" />
-              <span>San Francisco, California</span>
+              <span>{location}</span>
             </div>
           </div>
         </div>
@@ -139,49 +232,73 @@ const ProfilePage = () => {
           title={"Bio"}
           icon={<UserCircle className="w-6 h-6" />}
           section={"bio"}
-          placeholder={"Tell us about yourself..."}
+          placeholder={bio}
+          bio={bio}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
         <ProfileSection
           title={"Education"}
           icon={<GraduationCapIcon className="w-6 h-6" />}
           section={"education"}
           placeholder={"Add education..."}
+          selectedItems={selectedItems["education"]}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
         <ProfileSection
           title={"Extracurriculars"}
           icon={<BookOpenIcon className="w-6 h-6" />}
           section={"extracurriculars"}
           placeholder={"Add extracurricular activity..."}
+          selectedItems={selectedItems["extracurriculars"]}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
         <ProfileSection
           title={"Clubs"}
           icon={<UsersIcon className="w-6 h-6" />}
           section={"clubs"}
           placeholder={"Add club..."}
+          selectedItems={selectedItems["clubs"]}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
         <ProfileSection
           title={"Hobbies"}
           icon={<SmileIcon className="w-6 h-6" />}
           section={"hobbies"}
           placeholder={"Add hobby..."}
+          selectedItems={selectedItems["hobbies"]}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
         <ProfileSection
           title={"Work Experience"}
           icon={<BriefcaseIcon className="w-6 h-6" />}
           section={"work"}
           placeholder={"Add work experience..."}
+          selectedItems={selectedItems["work"]}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
         <ProfileSection
           title={"Awards"}
           icon={<AwardIcon className="w-6 h-6" />}
           section={"awards"}
           placeholder={"Add award..."}
+          selectedItems={selectedItems["awards"]}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
         <ProfileSection
           title={"Volunteer"}
           icon={<HeartIcon className="w-6 h-6" />}
           section={"volunteer"}
           placeholder={"Add volunteer experience..."}
+          selectedItems={selectedItems["volunteer"]}
+          onChange={handleProfileSectionUpdate}
+          onSave={handleSaveProfileSection}
         />
       </div>
     </div>

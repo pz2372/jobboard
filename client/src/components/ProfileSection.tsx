@@ -19,9 +19,10 @@ import {
   PencilIcon,
   CheckIcon,
 } from "lucide-react";
-import SuggestionBubble from "../components/SuggestionBubble";
+import SuggestionBubble from "./SuggestionBubble";
 import SelectedItem from "./SelectedItem";
 import suggestions from "./Suggestions";
+import axiosInstance from "axiosInstance";
 
 type InputValues = {
   [key in SuggestionSection]?: string;
@@ -41,9 +42,17 @@ type SelectedItems = Record<string, any[]>;
 
 interface ProfileSectionProps {
   title: string;
-  icon: ReactNode;
-  section: string;
+  icon: React.ReactNode;
+  section: SuggestionSection;
   placeholder: string;
+  selectedItems?: string[];
+  bio?: string;
+  onChange: (
+    action: "add" | "remove" | "bio",
+    section: SuggestionSection,
+    value: string
+  ) => void;
+  onSave?: (section: string, bio?: string) => void;
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({
@@ -51,19 +60,15 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
   icon,
   section,
   placeholder,
+  selectedItems,
+  onChange,
+  onSave,
 }) => {
   const [bio, setBio] = useState("");
   const [inputValues, setInputValues] = useState<InputValues>({});
-  const [selectedItems, setSelectedItems] = useState<SelectedItems>({
-    education: [],
-    extracurriculars: [],
-    clubs: [],
-    hobbies: [],
-    work: [],
-    awards: [],
-    volunteer: [],
-  });
-  const [editModes, setEditModes] = useState({
+  const [editModes, setEditModes] = useState<
+    Record<SuggestionSection, boolean>
+  >({
     bio: false,
     education: false,
     extracurriculars: false,
@@ -73,12 +78,18 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
     awards: false,
     volunteer: false,
   });
-  const filteredSuggestions =
-    suggestions[section]?.filter(
-      (suggestion) => !selectedItems[section].includes(suggestion)
-    ) || [];
 
-  const toggleEditMode = (section) => {
+  // Ensure `selectedItems` is always an array
+  const selectedItemsSafe = Array.isArray(selectedItems) ? selectedItems : [];
+
+  // Filter suggestions correctly
+  const filteredSuggestions = Array.isArray(suggestions[section])
+    ? suggestions[section].filter(
+        (suggestion) => !selectedItemsSafe.includes(suggestion)
+      )
+    : [];
+
+  const toggleEditMode = (section: SuggestionSection) => {
     setEditModes((prev) => ({
       ...prev,
       [section]: !prev[section],
@@ -87,7 +98,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    section: string
+    section: SuggestionSection
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -95,26 +106,20 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
     }
   };
 
-  const handleAdd = (section: string, value?: string) => {
-    const itemToAdd = value ?? inputValues[section as keyof InputValues];
+  const handleAdd = (section: SuggestionSection, value?: string) => {
+    const itemToAdd = value ?? inputValues[section];
 
-    if (!itemToAdd) return; // Ensure value exists
+    if (!itemToAdd) return;
 
-    setSelectedItems((prev) => ({
-      ...prev,
-      [section]: prev[section] ? [...prev[section], itemToAdd] : [itemToAdd], // Handle undefined case
-    }));
+    if (Array.isArray(selectedItems)) {
+      onChange("add", section, itemToAdd);
+    } else {
+      console.error(`selectedItems[${section}] is not an array`);
+    }
 
     setInputValues((prev) => ({
       ...prev,
-      [section]: "", // Clear input after adding
-    }));
-  };
-
-  const handleRemove = (section, value) => {
-    setSelectedItems((prev) => ({
-      ...prev,
-      [section]: prev[section].filter((item) => item !== value),
+      [section]: "",
     }));
   };
 
@@ -128,14 +133,23 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
         <div className="flex items-center gap-2">
           {editModes[section] ? (
             <button
-              onClick={() => toggleEditMode(section)}
+              onClick={() => {
+                toggleEditMode(section);
+                if (section == "bio") {
+                  onSave(section, bio);
+                } else {
+                  onSave(section);
+                }
+              }}
               className="p-2 rounded-full bg-teal-600 text-white hover:bg-teal-700 border border-teal-500 transition-colors"
             >
               <CheckIcon className="w-4 h-4" />
             </button>
           ) : (
             <button
-              onClick={() => toggleEditMode(section)}
+              onClick={() => {
+                toggleEditMode(section);
+              }}
               className="p-2 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 border border-teal-200 transition-colors"
             >
               <PencilIcon className="w-4 h-4" />
@@ -147,8 +161,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
         {section === "bio" ? (
           <textarea
             placeholder={placeholder}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
+            value={bio || ""}
+            onChange={(e) => {setBio(e.target.value); onChange("bio", "bio", bio)}}
             disabled={!editModes.bio}
             className={`w-full px-4 py-3 rounded-xl bg-white text-sm text-teal-600 placeholder-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 transition-colors min-h-[120px] resize-none ${
               editModes.bio
@@ -181,13 +195,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
             </div>
           )
         )}
-        {selectedItems[section]?.length > 0 && (
+        {selectedItemsSafe.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {selectedItems[section].map((item) => (
+            {selectedItemsSafe.map((item) => (
               <SelectedItem
                 key={item}
                 text={item}
-                onRemove={() => handleRemove(section, item)}
+                onRemove={() => onChange("remove", section, item)}
                 isEditMode={editModes[section]}
               />
             ))}
@@ -199,7 +213,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
               <SuggestionBubble
                 key={suggestion}
                 text={suggestion}
-                onClick={(text) => handleAdd(section, text)}
+                onClick={() => handleAdd(section, suggestion)}
               />
             ))}
           </div>

@@ -53,6 +53,10 @@ module.exports = (sequelize) => {
         type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true,
       },
+      work: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+      },
       volunteer: {
         type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true,
