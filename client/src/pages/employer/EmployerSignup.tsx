@@ -14,12 +14,14 @@ import {
   Loader2Icon,
   CheckCircleIcon,
 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const EmployerSignup = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     companyName: "",
     email: "",
@@ -124,7 +126,7 @@ const EmployerSignup = () => {
       setIsSuccess(true);
     } catch (error) {
       setSubmissionError(
-          "An error occurred during registration. Please try again."
+        "An error occurred during registration. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -162,30 +164,6 @@ const EmployerSignup = () => {
           </div>
         ) : (
           <>
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    step === 1
-                      ? "bg-teal-600 text-white"
-                      : "bg-teal-100 text-teal-600"
-                  }`}
-                >
-                  1
-                </div>
-                <div className="w-20 h-1 bg-teal-100"></div>
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    step === 2
-                      ? "bg-teal-600 text-white"
-                      : "bg-teal-100 text-teal-600"
-                  }`}
-                >
-                  2
-                </div>
-              </div>
-            </div>
-
             <div className="bg-white rounded-3xl shadow-lg p-8 mb-12">
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                 {step === 1 ? (
@@ -340,7 +318,7 @@ const EmployerSignup = () => {
                   {step === 1 ? (
                     <button
                       onClick={handleNext}
-                      disabled={passwordError? true: false}
+                      disabled={passwordError ? true : false}
                       className="flex-1 bg-teal-600 text-white px-8 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105 text-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       Next
@@ -368,9 +346,12 @@ const EmployerSignup = () => {
               <div className="mt-8 text-center">
                 <p className="text-gray-600">
                   Already have an account?{" "}
-                  <a className="text-teal-600 hover:text-teal-500 font-medium">
+                  <Link
+                    to={"/employer/login"}
+                    className="text-teal-600 hover:text-teal-500 font-medium"
+                  >
                     Sign in
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>

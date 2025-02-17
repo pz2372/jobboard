@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { UserCircle, BriefcaseIcon, LockIcon, MailIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const EmployerLogin = () => {
   const [formData, setFormData] = useState({
@@ -96,9 +97,9 @@ const EmployerLogin = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-600">
               Don't have an account?{" "}
-              <a className="text-teal-600 hover:text-teal-500 font-medium">
+              <Link to={"/employer/signup"} className="text-teal-600 hover:text-teal-500 font-medium">
                 Register now
-              </a>
+              </Link>
             </p>
           </div>
         </div>

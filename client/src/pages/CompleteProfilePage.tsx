@@ -16,6 +16,7 @@ import {
   XIcon,
   User,
 } from "lucide-react";
+import suggestions from "components/Suggestions";
 
 type Category =
   | "extracurriculars"
@@ -64,35 +65,7 @@ const CompleteProfilePage = () => {
     awards: "",
     volunteer: "",
   });
-  const suggestions = {
-    education: [
-      "High School Diploma",
-      "Bachelor's Degree",
-      "Master's Degree",
-      "PhD",
-    ],
-    extracurriculars: [
-      "Sports Team",
-      "Student Government",
-      "Debate Club",
-      "Theater",
-    ],
-    clubs: ["Chess Club", "Book Club", "Coding Club", "Environmental Club"],
-    hobbies: ["Reading", "Photography", "Gaming", "Cooking"],
-    work: ["Internship", "Part-time Job", "Full-time Position", "Freelance"],
-    awards: [
-      "Academic Excellence",
-      "Leadership Award",
-      "Sports Achievement",
-      "Community Service",
-    ],
-    volunteer: [
-      "Local Food Bank",
-      "Animal Shelter",
-      "Environmental Cleanup",
-      "Teaching Assistant",
-    ],
-  };
+
 
   const handleAdd = (
     item: string,
@@ -124,6 +97,7 @@ const CompleteProfilePage = () => {
     });
   };
 
+
   const handleRemove = (item: string, category: Category) => {
     const updateState = {
       extracurriculars: setSelectedExtracurriculars,
@@ -142,6 +116,7 @@ const CompleteProfilePage = () => {
     updateState[category](currentState[category].filter((i) => i !== item));
   };
 
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     category: Category
@@ -152,6 +127,7 @@ const CompleteProfilePage = () => {
     });
   };
 
+
   const handleKeyPress = (
     e: React.KeyboardEvent<HTMLInputElement>,
     category: Category
@@ -161,6 +137,7 @@ const CompleteProfilePage = () => {
       handleAdd("", category, true);
     }
   };
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -174,6 +151,7 @@ const CompleteProfilePage = () => {
       reader.readAsDataURL(file);
     }
   };
+
 
   const renderInput = (
     category: Category,
@@ -232,9 +210,10 @@ const CompleteProfilePage = () => {
     );
   };
 
+  
   return (
-    <div className="min-h-screen w-full bg-white">
-      <main className="max-w-2xl mx-auto px-4 py-12">
+    <div className="w-full">
+      <div className="max-w-2xl mx-auto px-10 bg-white rounded-3xl py-12">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Complete Your Profile
@@ -283,17 +262,6 @@ const CompleteProfilePage = () => {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 rounded-full border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 hover:border-teal-300 transition-colors"
-                  placeholder="John Doe"
-                />
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Bio
@@ -407,7 +375,7 @@ const CompleteProfilePage = () => {
             <ChevronRightIcon className="w-4 h-4" />
           </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

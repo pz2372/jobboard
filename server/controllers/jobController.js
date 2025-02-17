@@ -16,12 +16,11 @@ exports.getAllJobs = async (req, res) => {
 //Get Searched Jobs
 exports.getSearchJobs = async (req, res) => {
   try {
-    const searchTerm = req.body.query;
-    const location = req.body.location;
+    const { searchQuery, searchLocation } = req.query;
 
     // Check if searchTerm is empty
-    if (!searchTerm || searchTerm.trim() === "") {
-      return res.status(400).json({ message: "Search term is required" });
+    if (!searchQuery || searchQuery.trim() === "") {
+      return res.status(400).json({ message: "Search term is required" })
     }
 
     // Build the query conditions
@@ -30,21 +29,21 @@ exports.getSearchJobs = async (req, res) => {
         {
           [Op.or]: [
             // ILIKE for partial matching
-            { title: { [Op.iLike]: `%${searchTerm}%` } },
-            { description: { [Op.iLike]: `%${searchTerm}%` } },
+            { title: { [Op.iLike]: `%${searchQuery}%` } },
+            { description: { [Op.iLike]: `%${searchQuery}%` } },
             // Full-text search
             literal(
-              `"search_vector" @@ to_tsquery('english', '${searchTerm}')`
+              `"search_vector" @@ to_tsquery('english', '${searchQuery}')`
             ),
             // Fuzzy matching using pg_trgm
-            literal(`title % '${searchTerm}' OR description % '${searchTerm}'`),
+            literal(`title % '${searchQuery}' OR description % '${searchQuery}'`),
           ],
         },
       ],
     };
 
-    if (location) {
-      conditions[Op.and].push({ location: { [Op.iLike]: `%${location}%` } });
+    if (searchLocation) {
+      conditions[Op.and].push({ location: { [Op.iLike]: `%${searchLocation}%` } });
     }
 
     const jobs = await Job.findAndCountAll({
@@ -60,7 +59,7 @@ exports.getSearchJobs = async (req, res) => {
 
 // Get search by industry
 exports.getSearchIndustry = async (req, res) => {
-  const { industry } = req.body;
+  const { industry } = req.query;
 
   try {
     const jobs = await Job.findAll({

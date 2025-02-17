@@ -1,12 +1,41 @@
 import React from "react";
 import { useState } from "react";
 import { Search, MapPin, SlidersHorizontal, X, DollarSign } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import SearchFilters from "./SearchFilters";
 
+
 const SearchBar = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("searchQuery") || "");
+  const [searchLocation, setSearchLocation] = useState(searchParams.get("searchLocation") || "");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate()
+
+  const page = location.pathname;
+
+  const handleSearch = () => {
+    const params = new URLSearchParams(location.search); 
+
+    if (searchQuery) {
+      params.set("searchQuery", searchQuery);
+    } else {
+      params.delete("searchQuery"); 
+    }
+  
+    if (searchLocation) {
+      params.set("searchLocation", searchLocation);
+    } else {
+      params.delete("searchLocation");
+    }
+  
+    if (location.pathname === "/jobs") {
+      setSearchParams(params);
+    } else {
+      navigate(`/jobs?${params.toString()}`, { replace: true });
+    }
+  }
 
   return (
     <div className="relative">
@@ -18,6 +47,8 @@ const SearchBar = () => {
               type="text"
               placeholder="What's your dream job?"
               className="w-full px-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="flex-1 relative group">
@@ -26,10 +57,12 @@ const SearchBar = () => {
               type="text"
               placeholder="Where would you like to work?"
               className="w-full px-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
+              value={searchLocation}
+              onChange={(e) => setSearchLocation(e.target.value)}
             />
           </div>
 
-          {location.pathname == "/jobs" && (
+          {page === "/jobs" && (
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={`px-6 py-3 rounded-full border-2 ${
@@ -41,7 +74,7 @@ const SearchBar = () => {
             </button>
           )}
 
-          <button className="bg-teal-600 text-white px-10 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+          <button onClick={handleSearch} className="bg-teal-600 text-white px-10 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
             Search <Search className="w-5 h-5" />
           </button>
         </div>

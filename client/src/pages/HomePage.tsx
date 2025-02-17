@@ -40,17 +40,17 @@ import {
   Factory,
   Coffee,
   UserPlus,
-  Send
+  Send,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import SearchBar from "components/SearchBar";
 import Footer from "components/Footer";
-import AmazonLogo from '../images/amazon.png';
-import HarrisLogo from '../images/harris.png';
-import McDonaldsLogo from '../images/mcdonalds.png';
-import NikeLogo from '../images/nike.png';
-import WalmartLogo from '../images/walmart.png';
-import { Link } from "react-router-dom";
+import AmazonLogo from "../images/amazon.png";
+import HarrisLogo from "../images/harris.png";
+import McDonaldsLogo from "../images/mcdonalds.png";
+import NikeLogo from "../images/nike.png";
+import WalmartLogo from "../images/walmart.png";
+import { Link, useNavigate } from "react-router-dom";
 
 const categories = [
   {
@@ -85,7 +85,7 @@ const categories = [
     icon: Globe,
     title: "Education",
   },
-]
+];
 
 const HomePage = () => {
   const [counters, setCounters] = useState({
@@ -94,6 +94,8 @@ const HomePage = () => {
     placements: 0,
     satisfaction: 0,
   });
+  const navigate = useNavigate();
+
   useEffect(() => {
     const observerOptions = {
       threshold: 0.1,
@@ -150,7 +152,10 @@ const HomePage = () => {
       <SearchBar />
 
       {/* Statistics Section */}
-      <section id="stats-section" className="rounded-3xl py-20 bg-white animate-on-scroll">
+      <section
+        id="stats-section"
+        className="rounded-3xl mt-10 py-20 bg-white animate-on-scroll"
+      >
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
@@ -200,14 +205,13 @@ const HomePage = () => {
             Trusted By Leading Companies
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-            {[AmazonLogo, NikeLogo, McDonaldsLogo, HarrisLogo, WalmartLogo].map((logo, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-center"
-              >
-                <img src={logo} className="h-[70px]"/>
-              </div>
-            ))}
+            {[AmazonLogo, NikeLogo, McDonaldsLogo, HarrisLogo, WalmartLogo].map(
+              (logo, i) => (
+                <div key={i} className="flex items-center justify-center">
+                  <img src={logo} className="h-[70px]" />
+                </div>
+              )
+            )}
           </div>
         </div>
       </section>
@@ -222,6 +226,11 @@ const HomePage = () => {
             {categories.map((industry, index) => (
               <div
                 key={index}
+                onClick={() =>
+                  navigate(
+                    `/jobs?industry=${encodeURIComponent(industry.title)}`
+                  )
+                }
                 className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer group"
               >
                 <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-teal-600 transition-colors">
@@ -249,7 +258,7 @@ const HomePage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-teal-600" />
@@ -318,7 +327,10 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-            <button className="max-w-[900px] mx-auto px-8 py-4 bg-teal-600 text-white rounded-full hover:bg-teal-500 transition-all hover:shadow-xl flex items-center justify-center gap-2 text-lg font-semibold">
+            <button
+              onClick={() => navigate("/employer/signup")}
+              className="max-w-[900px] mx-auto px-8 py-4 bg-teal-600 text-white rounded-full hover:bg-teal-500 transition-all hover:shadow-xl flex items-center justify-center gap-2 text-lg font-semibold"
+            >
               Get Started Now <ArrowRight className="w-5 h-5" />
             </button>
           </div>
@@ -340,9 +352,9 @@ const HomePage = () => {
               className="flex-1 px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
             <Link to="/employer/signup">
-            <button className="px-8 py-4 bg-white text-teal-600 rounded-full hover:bg-teal-50 transition-colors font-semibold flex items-center justify-center">
-              Subscribe <Send className="w-5 h-5 mx-1"/>
-            </button>
+              <button className="px-8 py-4 bg-white text-teal-600 rounded-full hover:bg-teal-50 transition-colors font-semibold flex items-center justify-center">
+                Subscribe <Send className="w-5 h-5 mx-1" />
+              </button>
             </Link>
           </form>
         </div>

@@ -46,7 +46,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-teal-50 pt-10 pb-8 animate-on-scroll">
+    <footer className="bg-teal-50 pt-10 pb-3 animate-on-scroll">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid md:grid-cols-5 gap-12 mb-12">
           {/* Company Info */}
@@ -90,9 +90,9 @@ const Footer = () => {
                 "Cookie Policy",
               ].map((item) => (
                 <li key={item}>
-                  <a className="text-gray-600 hover:text-teal-600 transition-colors flex items-center">
+                  <Link to={`/terms/${encodeURIComponent(item)}`} className="text-gray-600 hover:text-teal-600 transition-colors flex items-center">
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -111,9 +111,9 @@ const Footer = () => {
                 "Student Resources",
               ].map((item) => (
                 <li key={item}>
-                  <a className="text-gray-600 hover:text-teal-600 transition-colors flex items-center">
+                  <Link to={"/comingsoon"} className="text-gray-600 hover:text-teal-600 transition-colors flex items-center">
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

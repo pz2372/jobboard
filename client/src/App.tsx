@@ -3,6 +3,7 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NavBar from './components/NavBar';
 import ProtectedRoute from 'components/ProtectedRoute';
+import RedirectIfLoggedIn from "./components/RedirectedIfLoggedIn"
 
 import HomePage from './pages/HomePage';
 import JobPage from './pages/JobPage';
@@ -33,10 +34,10 @@ const App = () => {
           <Routes>
           <Route path="/" element={<HomePage />} />
             <Route path="/jobs" element={<JobPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/login" element={<RedirectIfLoggedIn><LoginPage /></RedirectIfLoggedIn>} />
+            <Route path="/signup" element={<RedirectIfLoggedIn><SignupPage /></RedirectIfLoggedIn>} />
             <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
-            <Route path="/terms" element={<TermsPage />} /> 
+            <Route path="/terms/:item" element={<TermsPage />} /> 
 
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
@@ -55,8 +56,8 @@ const App = () => {
             {/*</Route>*/}
 
              {/* Employer Public Routes */}
-            <Route path="/employer/signup" element={<EmployerSignup />} />
-            <Route path="/employer/login" element={<EmployerLogin />} />
+            <Route path="/employer/signup" element={<RedirectIfLoggedIn><EmployerSignup /></RedirectIfLoggedIn>} />
+            <Route path="/employer/login" element={<RedirectIfLoggedIn><EmployerLogin /></RedirectIfLoggedIn>} />
             {/*<Route path="/employer/forgotpassword" element={<EmployerForgotPassword />} />*/}
           </Routes>
         </main>

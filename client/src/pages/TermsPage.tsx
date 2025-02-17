@@ -13,9 +13,19 @@ import {
   BookOpen,
   ChevronLeft,
 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 const TermsPage = () => {
-  const [activePage, setActivePage] = useState<PageKey>("agreement");
+  const { item } = useParams();
+  const decodedItem = decodeURIComponent(item || "");
+  const pageMap: Record<string, keyof typeof pages> = {
+    "User Agreement": "agreement",
+    "Cookie Policy": "cookies",
+    "Privacy Policy": "privacy",
+    "Terms & Conditions": "terms",
+  };
+  const pageKey = pageMap[decodedItem] || "agreement";
+  const [activePage, setActivePage] = useState<keyof typeof pages>(pageKey);
 
   type PageKey = keyof typeof pages;
 
@@ -120,7 +130,7 @@ const TermsPage = () => {
   const ActiveIcon = pages[activePage].icon;
 
   return (
-    <main className="max-w-4xl mx-auto px-4 py-8">
+    <>
       <div className="text-center mb-8">
         <div className="flex justify-center mb-4">
           <div className="bg-teal-100 p-3 rounded-full">
@@ -170,7 +180,7 @@ const TermsPage = () => {
           })}
         </div>
       </div>
-    </main>
+    </>
   );
 };
 
