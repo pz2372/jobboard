@@ -26,6 +26,7 @@ exports.getApplications = async (req, res) => {
   }
 };
 
+
 // Create application
 exports.createApplication = async (req, res) => {
   try {

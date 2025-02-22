@@ -5,6 +5,7 @@ const path = require("path");
 
 // Create user profile
 exports.createUserProfile = async (req, res) => {
+
   try {
     const { userId, bio, location, phoneNumber } = req.body;
     // Ensure the user exists
@@ -19,11 +20,11 @@ exports.createUserProfile = async (req, res) => {
       return res.status(400).json({ error: "User profile already exists" });
     }
 
-    const extracurriculars = JSON.parse(req.body.extracurriculars);
-    const clubs = JSON.parse(req.body.clubs);
-    const hobbies = JSON.parse(req.body.hobbies);
-    const awards = JSON.parse(req.body.awards);
-    const volunteer = JSON.parse(req.body.volunteer);
+    const extracurriculars = req.body.extracurriculars;
+    const clubs = req.body.clubs;
+    const hobbies = req.body.hobbies;
+    const awards = req.body.awards;
+    const volunteer = req.body.volunteer;
 
     let profileImage;
     if (req.file) {

@@ -15,8 +15,16 @@ import {
   PlusIcon,
   XIcon,
   User,
+  Upload,
 } from "lucide-react";
 import suggestions from "components/Suggestions";
+import UploadModal from "components/UploadModal";
+import axiosInstance from "axiosInstance";
+import { RootState } from "redux/store";
+import { useSelector } from "react-redux";
+import SuggestionBubble from "components/SuggestionBubble";
+import SelectedItem from "components/SelectedItem";
+import { useNavigate } from "react-router-dom";
 
 type Category =
   | "extracurriculars"
@@ -29,28 +37,15 @@ interface InputValues {
   [key: string]: string;
 }
 
-const SuggestionBubble = ({ text, onClick }: any) => (
-  <button
-    onClick={onClick}
-    className="flex items-center gap-2 px-4 py-2 rounded-full border border-dashed border-gray-200 bg-white text-teal-500 hover:bg-teal-50 hover:border-teal-300 transition-all"
-  >
-    <PlusIcon className="w-4 h-4" />
-    <span className="text-sm">{text}</span>
-  </button>
-);
-
-const SelectedBubble = ({ text, onRemove }: any) => (
-  <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-teal-300 bg-white text-teal-700 shadow-sm">
-    <span className="text-sm font-medium">{text}</span>
-    <button onClick={onRemove} className="hover:text-teal-900">
-      <XIcon className="w-4 h-4" />
-    </button>
-  </div>
-);
-
 const CompleteProfilePage = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [step, setStep] = useState(1);
+  const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
+  const [currentPosition, setCurrentPosition] = useState("");
+  const [education, setEducation] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedExtracurriculars, setSelectedExtracurriculars] = useState<
     string[]
   >([]);
@@ -65,7 +60,8 @@ const CompleteProfilePage = () => {
     awards: "",
     volunteer: "",
   });
-
+  const user = useSelector((state: RootState) => state.auth.user);
+  const navigate = useNavigate();
 
   const handleAdd = (
     item: string,
@@ -97,7 +93,6 @@ const CompleteProfilePage = () => {
     });
   };
 
-
   const handleRemove = (item: string, category: Category) => {
     const updateState = {
       extracurriculars: setSelectedExtracurriculars,
@@ -116,7 +111,6 @@ const CompleteProfilePage = () => {
     updateState[category](currentState[category].filter((i) => i !== item));
   };
 
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     category: Category
@@ -126,7 +120,6 @@ const CompleteProfilePage = () => {
       [category]: e.target.value,
     });
   };
-
 
   const handleKeyPress = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -138,20 +131,33 @@ const CompleteProfilePage = () => {
     }
   };
 
+  const handleSaveProfilePicture = (file: File | null) => {
+    if (!file) return;
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          setProfileImage(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        setProfileImage(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    axiosInstance
+      .put(`/userprofile/picture/${user.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        console.log("Profile picture uploaded successfully", response);
+      })
+      .catch((error) => {
+        console.error("Error uploading profile picture", error);
+      });
   };
-
 
   const renderInput = (
     category: Category,
@@ -183,10 +189,11 @@ const CompleteProfilePage = () => {
         </div>
         <div className="flex flex-wrap gap-2 pl-12">
           {categorySelectedItems.map((item, index: number) => (
-            <SelectedBubble
+            <SelectedItem
               key={`selected-${index}`}
               text={item}
               onRemove={() => handleRemove(item, category)}
+              isEditMode={true}
             />
           ))}
         </div>
@@ -210,7 +217,33 @@ const CompleteProfilePage = () => {
     );
   };
 
-  
+  const handleCompleteProfile = () => {
+    const profileData = {
+      bio,
+      location,
+      currentPosition,
+      education,
+      phoneNumber,
+      extracurriculars: selectedExtracurriculars,
+      clubs: selectedClubs,
+      hobbies: selectedHobbies,
+      awards: selectedAwards,
+      volunteer: selectedVolunteer,
+      userId: user.id,
+    };
+
+    axiosInstance
+      .post("/userprofile/profile", profileData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        navigate("/profile");
+      })
+      .catch((error) => console.error(error));
+  };
+
   return (
     <div className="w-full">
       <div className="max-w-2xl mx-auto px-10 bg-white rounded-3xl py-12">
@@ -245,16 +278,19 @@ const CompleteProfilePage = () => {
                   ) : (
                     <UserCircle className="w-16 h-16 text-gray-400" />
                   )}
-                </div>
-                <label className="absolute bottom-0 right-0 bg-teal-600 p-2 rounded-full shadow-lg hover:bg-teal-700 transition-colors cursor-pointer">
-                  <CameraIcon className="w-4 h-4 text-white" />
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageChange}
+                  <UploadModal
+                    isOpen={uploadModalOpen}
+                    onClose={() => setUploadModalOpen(false)}
+                    onSave={handleSaveProfilePicture}
                   />
-                </label>
+                </div>
+
+                <button
+                  onClick={() => setUploadModalOpen(true)}
+                  className="absolute bottom-0 right-0 bg-teal-600 p-2 rounded-full shadow-lg hover:bg-teal-700 transition-colors"
+                >
+                  <Upload className="w-4 h-4 text-white" />
+                </button>
               </div>
               <p className="text-sm text-gray-500">
                 Upload your profile picture
@@ -269,7 +305,9 @@ const CompleteProfilePage = () => {
                 <textarea
                   className="w-full px-4 py-3 rounded-3xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 hover:border-teal-300 transition-colors"
                   rows={4}
+                  value={bio}
                   placeholder="Tell us about yourself..."
+                  onChange={(e) => setBio(e.target.value)}
                 />
               </div>
             </div>
@@ -285,6 +323,8 @@ const CompleteProfilePage = () => {
                   type="text"
                   className="flex-1 border-none focus:outline-none bg-transparent text-teal-600 placeholder-gray-400"
                   placeholder="Location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                 />
               </div>
 
@@ -294,6 +334,8 @@ const CompleteProfilePage = () => {
                   type="text"
                   className="flex-1 border-none focus:outline-none bg-transparent text-teal-600 placeholder-gray-400"
                   placeholder="Current Position"
+                  value={currentPosition}
+                  onChange={(e) => setCurrentPosition(e.target.value)}
                 />
               </div>
 
@@ -303,6 +345,8 @@ const CompleteProfilePage = () => {
                   type="text"
                   className="flex-1 border-none focus:outline-none bg-transparent text-teal-600 placeholder-gray-400"
                   placeholder="Education"
+                  value={education}
+                  onChange={(e) => setEducation(e.target.value)}
                 />
               </div>
 
@@ -312,15 +356,8 @@ const CompleteProfilePage = () => {
                   type="tel"
                   className="flex-1 border-none focus:outline-none bg-transparent text-teal-600 placeholder-gray-400"
                   placeholder="Phone Number"
-                />
-              </div>
-
-              <div className="flex items-center gap-3 p-4 rounded-full border border-gray-200 bg-white hover:border-teal-300 transition-colors">
-                <MailIcon className="w-5 h-5 text-teal-400" />
-                <input
-                  type="email"
-                  className="flex-1 border-none focus:outline-none bg-transparent text-teal-600 placeholder-gray-400"
-                  placeholder="Email Address"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                 />
               </div>
             </div>
@@ -368,7 +405,13 @@ const CompleteProfilePage = () => {
           )}
 
           <button
-            onClick={() => (step < 3 ? setStep(step + 1) : null)}
+            onClick={() => {
+              if (step < 3) {
+                setStep(step + 1);
+              } else {
+                handleCompleteProfile();
+              }
+            }}
             className="ml-auto flex items-center gap-2 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
           >
             {step === 3 ? "Complete" : "Next"}

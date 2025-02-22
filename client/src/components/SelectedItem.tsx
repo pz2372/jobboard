@@ -1,7 +1,13 @@
 import React from "react";
 import { X } from "lucide-react";
 
-const SelectedItem = ({ text, onRemove, isEditMode }: any) => {
+interface SelectedItemProps {
+  text: string;
+  onRemove: (text: string) => void;
+  isEditMode?: boolean;
+}
+
+const SelectedItem: React.FC<SelectedItemProps> = ({ text, onRemove, isEditMode = false }) => {
   return (
     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 text-teal-600 text-sm border border-solid border-teal-300">
       <span>{text}</span>

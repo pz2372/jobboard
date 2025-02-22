@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { UserCircle, BriefcaseIcon, LockIcon, MailIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { employerLogin, employerLogout } from "../../redux/employerAuthSlice";
+import type { AppDispatch } from "../../redux/store";
 
 const EmployerLogin = () => {
   const [formData, setFormData] = useState({
@@ -17,13 +20,23 @@ const EmployerLogin = () => {
     }));
     setValidationError("");
   };
-  const handleSubmit = (e: any) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate()
+
+  const handleEmployerLogin = async (e: any) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
       setValidationError("Please fill in all required fields");
       return;
     }
-    // Handle login logic here
+
+    try {
+      await dispatch(employerLogin({ email: formData.email, password: formData.password })).unwrap();
+      navigate("/employer");
+    } catch (error) {
+      console.error("Login failed:", error);
+      setValidationError(error || "Login failed. Please try again.");
+    }
   };
 
   return (
@@ -39,7 +52,10 @@ const EmployerLogin = () => {
         </div>
 
         <div className="bg-white rounded-3xl shadow-lg p-8 mb-12">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        {validationError && (
+              <p className="font-bold text-red-600 pb-5 text-center">{validationError}</p>
+            )}
+          <form className="space-y-6" onSubmit={handleEmployerLogin}>
             <div className="grid grid-cols-1 gap-6">
               <div className="relative">
                 <MailIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
@@ -82,10 +98,6 @@ const EmployerLogin = () => {
               </a>
             </div>
 
-            {validationError && (
-              <p className="text-red-500 text-sm">{validationError}</p>
-            )}
-
             <button
               type="submit"
               className="w-full bg-teal-600 text-white px-8 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105 text-lg font-medium"
@@ -97,7 +109,10 @@ const EmployerLogin = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-600">
               Don't have an account?{" "}
-              <Link to={"/employer/signup"} className="text-teal-600 hover:text-teal-500 font-medium">
+              <Link
+                to={"/employer/signup"}
+                className="text-teal-600 hover:text-teal-500 font-medium"
+              >
                 Register now
               </Link>
             </p>

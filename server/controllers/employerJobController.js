@@ -22,6 +22,8 @@ exports.createJob = async (req, res) => {
     tags
   } = req.body;
 
+  console.log(req.body)
+
   try {
     const newJob = await Job.create({
       employerId,

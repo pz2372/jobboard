@@ -15,12 +15,17 @@ import {
   CheckCircleIcon,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "axiosInstance";
+import { useDispatch } from "react-redux";
+import { employerSignup } from "../../redux/employerAuthSlice";
+import type { AppDispatch } from "../../redux/store";
 
 const EmployerSignup = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     companyName: "",
@@ -54,6 +59,7 @@ const EmployerSignup = () => {
     setValidationError("");
     setSubmissionError("");
   };
+
   const validateStep1 = () => {
     if (
       !formData.companyName ||
@@ -71,6 +77,7 @@ const EmployerSignup = () => {
     }
     return true;
   };
+
   const validateStep2 = () => {
     if (
       !formData.address ||
@@ -97,32 +104,29 @@ const EmployerSignup = () => {
     }
     return true;
   };
+
   const handleNext = () => {
     if (step === 1 && validateStep1()) {
       setStep(2);
     }
   };
+
   const handleBack = () => {
     setStep(1);
     setValidationError("");
     setSubmissionError("");
   };
+
   const handleSubmit = async () => {
     if (!validateStep2()) return;
     setIsLoading(true);
     setSubmissionError("");
     try {
-      const response = await fetch("https://api.example.com/employer/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
+      dispatch(employerSignup(formData))
+        .unwrap()
+        .then(() => {
+          navigate("/employer");
+        });
       setIsSuccess(true);
     } catch (error) {
       setSubmissionError(
@@ -165,6 +169,15 @@ const EmployerSignup = () => {
         ) : (
           <>
             <div className="bg-white rounded-3xl shadow-lg p-8 mb-12">
+            {passwordError && (
+                  <p className="font-bold text-red-600 pb-5 text-center">{passwordError}</p>
+                )}
+                {validationError && (
+                  <p className="font-bold text-red-600 pb-5 text-center">{validationError}</p>
+                )}
+                {submissionError && (
+                  <p className="font-bold text-red-600 pb-5 text-center">{submissionError}</p>
+                )}
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                 {step === 1 ? (
                   <div className="grid grid-cols-1 gap-6">
@@ -292,16 +305,6 @@ const EmployerSignup = () => {
                       />
                     </div>
                   </div>
-                )}
-
-                {passwordError && (
-                  <p className="text-red-500 text-sm">{passwordError}</p>
-                )}
-                {validationError && (
-                  <p className="text-red-500 text-sm">{validationError}</p>
-                )}
-                {submissionError && (
-                  <p className="text-red-500 text-sm">{submissionError}</p>
                 )}
 
                 <div className="flex justify-between gap-4">

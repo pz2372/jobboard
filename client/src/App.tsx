@@ -11,6 +11,8 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import TermsPage from './pages/TermsPage';
+import ComingSoon from 'pages/ComingSoon';
+import FourZeroFour from 'pages/404';
 
 import ProfilePage from './pages/ProfilePage';
 import HistoryPage from './pages/HistoryPage';
@@ -19,6 +21,9 @@ import ApplicationPage from './pages/ApplicationPage';
 import ApplicationSuccessPage from 'pages/ApplicationSuccessPage';
 
 import CreateJob from './pages/employer/CreateJob';
+import JobSuccess from './pages/employer/JobSuccess';
+import CreateApplication from 'pages/employer/CreateApplication';
+import ApplicationSuccess from 'pages/employer/ApplicationSuccess';
 import EmployerDashboard from './pages/employer/EmployerDashboard';
 import EmployerSignup from './pages/employer/EmployerSignup';
 import EmployerLogin from './pages/employer/EmployerLogin';
@@ -38,6 +43,8 @@ const App = () => {
             <Route path="/signup" element={<RedirectIfLoggedIn><SignupPage /></RedirectIfLoggedIn>} />
             <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
             <Route path="/terms/:item" element={<TermsPage />} /> 
+            <Route path="/comingsoon" element={<ComingSoon />} />
+            <Route path="/404" element={<FourZeroFour />} />
 
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
@@ -52,7 +59,10 @@ const App = () => {
             {/* Employer Routes */}
             {/*<Route element={<EmployerRoute />}>*/}
               <Route path="/employer" element={<EmployerDashboard />} />
-              <Route path="/createjob" element={<CreateJob />} />
+              <Route path="/employer/createjob" element={<CreateJob />} />
+              <Route path="/employer/jobsuccess" element={<JobSuccess />} />
+              <Route path="/employer/createapplication/:jobId" element={<CreateApplication />} />
+              <Route path="/employer/applicationsuccess" element={<ApplicationSuccess />} />
             {/*</Route>*/}
 
              {/* Employer Public Routes */}

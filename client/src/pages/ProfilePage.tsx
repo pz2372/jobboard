@@ -93,22 +93,22 @@ const ProfilePage = () => {
 
   const handleSaveProfilePicture = (file: File | null) => {
     if (!file) return;
-  
+
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === "string") {
-        setProfilePicture(reader.result); 
+        setProfilePicture(reader.result);
       }
     };
     reader.readAsDataURL(file);
-  
+
     const formData = new FormData();
     formData.append("file", file);
-  
+
     axiosInstance
       .put(`/userprofile/picture/${user.id}`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",  
+          "Content-Type": "multipart/form-data",
         },
       })
       .then((response) => {
@@ -118,8 +118,6 @@ const ProfilePage = () => {
         console.error("Error uploading profile picture", error);
       });
   };
-  
-
 
   const handleProfileSectionUpdate = (
     action: string,

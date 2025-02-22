@@ -12,12 +12,19 @@ const persistConfig = {
   storage,
 };
 
+const employerPersistConfig = {
+  key: "employerAuth",
+  storage,
+};
+
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const persistedEmployerAuthReducer = persistReducer(employerPersistConfig, employerAuthReducer);
+
 
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
-    employerAuth: employerAuthReducer,
+    employerAuth: persistedEmployerAuthReducer,
     profile: profileReducer,
     filter: filterReducer,
   },

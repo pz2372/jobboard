@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Search,
   PlusIcon,
@@ -13,16 +13,31 @@ import {
   CalendarIcon,
   BuildingIcon,
 } from "lucide-react";
+import axiosInstance from "axiosInstance";
+import { useSelector } from "react-redux";
+import { RootState } from "redux/store";
+import { useNavigate } from "react-router-dom";
 
 const EmployerDashboard = () => {
+  const employer = useSelector(
+    (state: RootState) => state.employerAuth.employer
+  );
+  const navigate = useNavigate()
+
+  console.log(employer)
+  
+  useEffect(() => {
+    //axiosInstance.get("/employerjob/")
+  })
+
   return (
-    <div className="w-full min-h-screen bg-gray-50 px-4 py-8">
+    <div className="w-full min-h-screen bg-gray-50 px-4 py-8 rounded-3xl">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center ml-5 mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Job Listings Dashboard
+            {employer.companyName} Dashboard
           </h1>
-          <button className="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-500 transition-all duration-300 flex items-center gap-2">
+          <button onClick={()=> navigate("/employer/createjob")} className="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-500 transition-all duration-300 flex items-center gap-2">
             <PlusIcon className="w-5 h-5" />
             Create New Listing
           </button>

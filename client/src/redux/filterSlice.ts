@@ -28,12 +28,6 @@ const filterSlice = createSlice({
   name: "job-modal",
   initialState,
   reducers: {
-    filterOpen: (state) => {
-      state.isFilterOpen = true;
-    },
-    filterClose: (state) => {
-      state.isFilterOpen = false;
-    },
     updateJobType: (state, action: PayloadAction<string>) => {
       const type = action.payload;
       if (state.filters.jobType.includes(type)) {
@@ -47,6 +41,6 @@ const filterSlice = createSlice({
   },
 });
 
-export const { filterOpen, filterClose, updateJobType } = filterSlice.actions;
+export const { updateJobType } = filterSlice.actions;
 
 export default filterSlice.reducer;
