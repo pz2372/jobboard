@@ -1,15 +1,25 @@
 import React from "react";
 import logo from "../images/logo.png";
 import mobileLogo from "../images/mobile_logo.png";
-import { BriefcaseIcon, TableOfContents, UserCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRightToLine, BriefcaseIcon, TableOfContents, UserCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { RootState } from "redux/store";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { employerLogout } from "../redux/employerAuthSlice";
+
 
 const NavBar = () => {
   const employer = useSelector(
     (state: RootState) => state.employerAuth.employer
   );
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    dispatch(employerLogout())
+    navigate("/")
+  }
+
 
   return (
     <>
@@ -47,19 +57,6 @@ const NavBar = () => {
               </Link>
               <div className="w-px h-6 bg-white/20 rounded-full"></div>
               <Link
-                to="/employer/settings"
-                className="flex items-center gap-2 text-white/90 font-medium group transition-all duration-300 hover:scale-110"
-              >
-                <div className="relative">
-                  <TableOfContents className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-white/20 rounded-full scale-0 group-hover:scale-150 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                </div>
-                <span className="group-hover:tracking-wider transition-all duration-300">
-                  Settings
-                </span>
-              </Link>
-              <div className="w-px h-6 bg-white/20 rounded-full"></div>
-              <Link
                 to="/employer/profile"
                 className="flex items-center gap-2 text-white/90 font-medium group transition-all duration-300 hover:scale-110"
               >
@@ -71,6 +68,19 @@ const NavBar = () => {
                   Profile
                 </span>
               </Link>
+              <div className="w-px h-6 bg-white/20 rounded-full"></div>
+              <div
+               onClick={()=>handleLogout}
+                className="flex items-center hover:cursor-pointer gap-2 text-white/90 font-medium group transition-all duration-300 hover:scale-110"
+              >
+                <div className="relative">
+                  <ArrowRightToLine className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-white/20 rounded-full scale-0 group-hover:scale-150 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                </div>
+                <span className="group-hover:tracking-wider transition-all duration-300">
+                  Log out
+                </span>
+              </div>
             </div>
           ) : (
             <div className="flex flex-grow justify-center gap-8">

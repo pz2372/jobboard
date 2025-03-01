@@ -16,12 +16,13 @@ import {
   UserIcon,
 } from "lucide-react";
 import { Job } from "components/interfaces/Job";
+import { applicationFieldMap } from "../components/ApplicationFieldMap";
 
 type Field = {
-  name: string;
+  name?: string;
   enabled: boolean;
   required: boolean;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 type BasicFieldsState = {
@@ -32,9 +33,7 @@ type BasicFieldsState = {
   city: Field;
   state: Field;
   zipCode: Field;
-  linkedin: Field;
-  website: Field;
-  currentEmployment: Field;
+  currentCompany: Field;
   yearsExperience: Field;
   educationLevel: Field;
   pronouns: Field;
@@ -63,92 +62,7 @@ const ApplicationPage = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [employerId, setEmployerId] = useState<number>(0);
   const [questions, setQuestions] = useState<ApplicationQuestion[]>([]);
-  const [basicFields, setBasicFields] = useState<BasicFieldsState>({
-    fullName: {
-      name: "Full Name",
-      enabled: true,
-      required: true,
-      icon: UserIcon,
-    },
-    email: {
-      name: "Email",
-      enabled: true,
-      required: true,
-      icon: MailIcon,
-    },
-    phone: {
-      name: "Phone Number",
-      enabled: true,
-      required: false,
-      icon: PhoneIcon,
-    },
-    address: {
-      name: "Street Address",
-      enabled: true,
-      required: false,
-      icon: MapPinIcon,
-    },
-    city: {
-      name: "City",
-      enabled: true,
-      required: false,
-      icon: MapPinIcon,
-    },
-    state: {
-      name: "State",
-      enabled: true,
-      required: false,
-      icon: MapPinIcon,
-    },
-    zipCode: {
-      name: "ZIP Code",
-      enabled: true,
-      required: false,
-      icon: MapPinIcon,
-    },
-    linkedin: {
-      name: "LinkedIn Profile",
-      enabled: true,
-      required: false,
-      icon: LinkedinIcon,
-    },
-    website: {
-      name: "Website/ Portfolio",
-      enabled: true,
-      required: false,
-      icon: GlobeIcon,
-    },
-    currentEmployment: {
-      name: "Current Employment",
-      enabled: true,
-      required: false,
-      icon: BuildingIcon,
-    },
-    yearsExperience: {
-      name: "Years of Experience",
-      enabled: true,
-      required: false,
-      icon: ClockIcon,
-    },
-    educationLevel: {
-      name: "Education Level",
-      enabled: true,
-      required: false,
-      icon: GraduationCapIcon,
-    },
-    pronouns: {
-      name: "Preferred Pronouns",
-      enabled: true,
-      required: false,
-      icon: UserIcon,
-    },
-    startDate: {
-      name: "Availability Start Date",
-      enabled: true,
-      required: false,
-      icon: CalendarIcon,
-    },
-  });
+  const [basicFields, setBasicFields] = useState<Partial<BasicFieldsState>>({});
   const [documents, setDocuments] = useState<DocumentsState>({
     resume: {
       required: false,
@@ -161,7 +75,7 @@ const ApplicationPage = () => {
       allowedTypes: ["PDF", "DOC", "DOCX"],
     },
   });
-  const [job, setJob] = useState<any>({title:"", company:""})
+  const [job, setJob] = useState<any>({ title: "", company: "" });
   const [jobApplicationId, setJobApplicationId] = useState(0);
   const [basicFieldAnswers, setBasicFieldAnswers] = useState({});
   const [questionAnswers, setQuestionAnswers] = useState<{
@@ -173,7 +87,8 @@ const ApplicationPage = () => {
     axiosInstance
       .get(`/applications/job/${jobId}`)
       .then((response) => {
-        const data = response.data
+        const data = response.data;
+        console.log(data);
         setEmployerId(data.employerId);
         setBasicFields(data.basicFields);
         setDocuments(data.documents);
@@ -211,7 +126,7 @@ const ApplicationPage = () => {
         applicationData
       );
       console.log("Application submitted:", response.data);
-      navigate(`/applicationsuccess`, { state: { job }});
+      navigate(`/applicationsuccess`, { state: { job } });
     } catch (error) {
       console.error("Error submitting application:", error);
       alert(
@@ -223,50 +138,59 @@ const ApplicationPage = () => {
   return (
     <div className="max-w-3xl mx-auto mt-6">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2 text-teal-600 font-comic">{job.company} Application</h1>
+        <h1 className="text-4xl font-bold mb-2 text-teal-600 font-comic">
+          {job.company} Application
+        </h1>
         <h3 className="text-2xl mb-5 text-teal-600 font-comic">{job.title}</h3>
       </div>
       <form className="space-y-6">
         <div className="space-y-6">
           {/* Personal Information Group */}
+
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-gray-700 border-b pb-2">
               Personal Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {["fullName", "email", "phone", "pronouns"].map((key: string) => {
-                const field = basicFields[key as keyof BasicFieldsState];
-                if (field.required) {
-                  return (
-                    <div key={key}>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          {field.name}{" "}
-                          {field.required && (
-                            <span className="text-red-500">*</span>
-                          )}
-                        </label>
-                      </div>
-                      <div className="relative">
-                        {field.icon && (
-                          <field.icon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        )}
-                        <input
-                          type="text"
-                          required={field.required}
-                          placeholder={field.name}
-                          onChange={(e) => {
-                            setBasicFieldAnswers((prev) => ({
-                              ...prev,
-                              [key]: e.target.value,
-                            }));
-                          }}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        />
-                      </div>
-                    </div>
-                  );
+                const field = basicFields?.[key as keyof BasicFieldsState];
+
+                if (!field) {
+                  console.warn(`Missing field for key: ${key}`);
+                  return null; // Prevents rendering if field is undefined
                 }
+
+                const IconComponent = applicationFieldMap[key]?.icon;
+
+                return (
+                  <div key={key}>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {applicationFieldMap[key]?.name}{" "}
+                        {field.required && (
+                          <span className="text-red-500">*</span>
+                        )}
+                      </label>
+                    </div>
+                    <div className="relative">
+                      {IconComponent && (
+                        <IconComponent className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      )}
+                      <input
+                        type="text"
+                        required={field.required}
+                        placeholder={field.name}
+                        onChange={(e) => {
+                          setBasicFieldAnswers((prev) => ({
+                            ...prev,
+                            [key]: e.target.value,
+                          }));
+                        }}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      />
+                    </div>
+                  </div>
+                );
               })}
             </div>
           </div>
@@ -278,38 +202,44 @@ const ApplicationPage = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {["address", "city", "state", "zipCode"].map((key: string) => {
-                const field = basicFields[key as keyof BasicFieldsState];
-                if (field.required) {
-                  return (
-                    <div key={key}>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          {field.name}{" "}
-                          {field.required && (
-                            <span className="text-red-500">*</span>
-                          )}
-                        </label>
-                      </div>
-                      <div className="relative">
-                        {field.icon && (
-                          <field.icon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        )}
-                        <input
-                          type="text"
-                          required={field.required}
-                          placeholder={field.name}
-                          onChange={(e) => {
-                            setBasicFieldAnswers((prev) => ({
-                              ...prev,
-                              [key]: e.target.value,
-                            }));
-                          }}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        />
-                      </div>
-                    </div>
-                  );
+                const field = basicFields?.[key as keyof BasicFieldsState];
+
+                if (!field) {
+                  console.warn(`Missing field for key: ${key}`);
+                  return null; // Prevents rendering if field is undefined
                 }
+
+                const IconComponent = applicationFieldMap[key]?.icon;
+
+                return (
+                  <div key={key}>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {applicationFieldMap[key]?.name}{" "}
+                        {field.required && (
+                          <span className="text-red-500">*</span>
+                        )}
+                      </label>
+                    </div>
+                    <div className="relative">
+                      {IconComponent && (
+                        <IconComponent className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      )}
+                      <input
+                        type="text"
+                        required={field.required}
+                        placeholder={field.name}
+                        onChange={(e) => {
+                          setBasicFieldAnswers((prev) => ({
+                            ...prev,
+                            [key]: e.target.value,
+                          }));
+                        }}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      />
+                    </div>
+                  </div>
+                );
               })}
             </div>
           </div>
@@ -321,94 +251,96 @@ const ApplicationPage = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                "linkedin",
-                "website",
-                "currentEmployment",
+                "currentCompany",
                 "yearsExperience",
                 "educationLevel",
                 "startDate",
               ].map((key: string) => {
                 const field = basicFields[key as keyof BasicFieldsState];
-                if (field.required) {
-                  return (
-                    <div key={key}>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          {field.name}{" "}
-                          {field.required && (
-                            <span className="text-red-500">*</span>
-                          )}
-                        </label>
-                      </div>
-                      <div className="relative">
-                        {/* Custom logic for Education Level */}
-                        {key === "educationLevel" && (
-                          <>
-                            <GraduationCapIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <select
-                              required={field.required}
-                              onChange={(e) => {
-                                setBasicFieldAnswers((prev) => ({
-                                  ...prev,
-                                  [key]: e.target.value,
-                                }));
-                              }}
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            >
-                              <option value="">Select Education Level</option>
-                              <option value="high_school">High School</option>
-                              <option value="associates">
-                                Associate's Degree
-                              </option>
-                              <option value="bachelors">
-                                Bachelor's Degree
-                              </option>
-                              <option value="masters">Master's Degree</option>
-                              <option value="doctorate">Doctorate</option>
-                            </select>
-                          </>
-                        )}
-                        {/* Custom logic for Start Date */}
-                        {key === "startDate" && (
-                          <>
-                            <CalendarIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <input
-                              type="date"
-                              required={field.required}
-                              onChange={(e) => {
-                                setBasicFieldAnswers((prev) => ({
-                                  ...prev,
-                                  [key]: e.target.value,
-                                }));
-                              }}
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            />
-                          </>
-                        )}
-                        {/* Default input for other fields */}
-                        {key !== "educationLevel" && key !== "startDate" && (
-                          <>
-                            {field.icon && (
-                              <field.icon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            )}
-                            <input
-                              type="text"
-                              required={field.required}
-                              placeholder={field.name}
-                              onChange={(e) => {
-                                setBasicFieldAnswers((prev) => ({
-                                  ...prev,
-                                  [key]: e.target.value,
-                                }));
-                              }}
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            />
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
+
+                if (!field) {
+                  console.warn(`Missing field for key: ${key}`);
+                  return null;
                 }
+
+                const IconComponent = applicationFieldMap[key]?.icon;
+
+                return (
+                  <div key={key}>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {applicationFieldMap[key]?.name}{" "}
+                        {field.required && (
+                          <span className="text-red-500">*</span>
+                        )}
+                      </label>
+                    </div>
+                    <div className="relative">
+                      {/* Custom logic for Education Level */}
+                      {key === "educationLevel" && (
+                        <>
+                          <GraduationCapIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                          <select
+                            required={field.required}
+                            onChange={(e) => {
+                              setBasicFieldAnswers((prev) => ({
+                                ...prev,
+                                [key]: e.target.value,
+                              }));
+                            }}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                          >
+                            <option value="">Select Education Level</option>
+                            <option value="high_school">High School</option>
+                            <option value="associates">
+                              Associate's Degree
+                            </option>
+                            <option value="bachelors">Bachelor's Degree</option>
+                            <option value="masters">Master's Degree</option>
+                            <option value="doctorate">Doctorate</option>
+                          </select>
+                        </>
+                      )}
+                      {/* Custom logic for Start Date */}
+                      {key === "startDate" && (
+                        <>
+                          <CalendarIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                          <input
+                            type="date"
+                            required={field.required}
+                            onChange={(e) => {
+                              setBasicFieldAnswers((prev) => ({
+                                ...prev,
+                                [key]: e.target.value,
+                              }));
+                            }}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                          />
+                        </>
+                      )}
+                      {/* Default input for other fields */}
+                      {key !== "educationLevel" && key !== "startDate" && (
+                        <>
+                          {IconComponent && (
+                            <IconComponent className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                          )}
+                          <input
+                            type="text"
+                            required={field.required}
+                            placeholder={field.name}
+                            onChange={(e) => {
+                              setBasicFieldAnswers((prev) => ({
+                                ...prev,
+                                [key]: e.target.value,
+                              }));
+                            }}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                          />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
               })}
             </div>
           </div>
@@ -423,8 +355,7 @@ const ApplicationPage = () => {
                   <p className="text-sm font-medium text-gray-900">Resume</p>
                   <input
                     type="file"
-                    disabled
-                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
+                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 hover:cursor-pointer"
                   />
                 </div>
               )}
@@ -435,8 +366,7 @@ const ApplicationPage = () => {
                   </p>
                   <input
                     type="file"
-                    disabled
-                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
+                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 hover:cursor-pointer"
                   />
                 </div>
               )}

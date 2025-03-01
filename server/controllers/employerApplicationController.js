@@ -1,5 +1,11 @@
-const { Application, Job, EmployerAccount, UserAccount, UserApplication } = require("../models");
-const { Op, Sequelize } = require('sequelize');
+const {
+  Application,
+  Job,
+  EmployerAccount,
+  UserAccount,
+  UserApplication,
+} = require("../models");
+const { Op, Sequelize } = require("sequelize");
 
 // Get all applications for a job
 exports.getApplications = async (req, res) => {
@@ -62,6 +68,7 @@ exports.createApplication = async (req, res) => {
     });
   }
 };
+
 
 // Get applied applications for employer
 exports.getEmployerAppliedApplications = async (req, res) => {

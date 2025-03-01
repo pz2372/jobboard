@@ -3,39 +3,60 @@ import { useState } from "react";
 import { Search, MapPin, SlidersHorizontal, X, DollarSign } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import SearchFilters from "./SearchFilters";
-
+import axiosInstance from "axiosInstance";
 
 const SearchBar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("searchQuery") || "");
-  const [searchLocation, setSearchLocation] = useState(searchParams.get("searchLocation") || "");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("searchQuery") || ""
+  );
+  const [searchLocation, setSearchLocation] = useState(
+    searchParams.get("searchLocation") || ""
+  );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const page = location.pathname;
 
   const handleSearch = () => {
-    const params = new URLSearchParams(location.search); 
+    const params = new URLSearchParams(searchParams);
 
-    if (searchQuery) {
-      params.set("searchQuery", searchQuery);
-    } else {
-      params.delete("searchQuery"); 
-    }
-  
-    if (searchLocation) {
-      params.set("searchLocation", searchLocation);
-    } else {
-      params.delete("searchLocation");
-    }
-  
+    searchQuery
+      ? params.set("searchQuery", searchQuery)
+      : params.delete("searchQuery");
+    searchLocation
+      ? params.set("searchLocation", searchLocation)
+      : params.delete("searchLocation");
+
     if (location.pathname === "/jobs") {
       setSearchParams(params);
     } else {
       navigate(`/jobs?${params.toString()}`, { replace: true });
     }
-  }
+  };
+
+  const handleApplyFilter = (
+    minWage: number,
+    maxWage: number,
+    type: string
+  ) => {
+    const params = new URLSearchParams(searchParams);
+
+    searchQuery
+      ? params.set("searchQuery", searchQuery)
+      : params.delete("searchQuery");
+    searchLocation
+      ? params.set("searchLocation", searchLocation)
+      : params.delete("searchLocation");
+  
+    minWage ? params.set("minWage", minWage.toString()) : params.delete("minWage");
+    maxWage ? params.set("maxWage", maxWage.toString()) : params.delete("maxWage");
+    type ? params.set("type", type) : params.delete("type");
+
+
+    setSearchParams(params)
+  };
 
   return (
     <div className="relative">
@@ -49,6 +70,7 @@ const SearchBar = () => {
               className="w-full px-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
           <div className="flex-1 relative group">
@@ -59,6 +81,7 @@ const SearchBar = () => {
               className="w-full px-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
 
@@ -74,13 +97,20 @@ const SearchBar = () => {
             </button>
           )}
 
-          <button onClick={handleSearch} className="bg-teal-600 text-white px-10 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+          <button
+            onClick={handleSearch}
+            className="bg-teal-600 text-white px-10 py-3 rounded-full hover:bg-teal-500 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+          >
             Search <Search className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <SearchFilters isFilterOpen={isFilterOpen} setIsFilterOpen={setIsFilterOpen}/>
+      <SearchFilters
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        handleApplyFilter={handleApplyFilter}
+      />
     </div>
   );
 };

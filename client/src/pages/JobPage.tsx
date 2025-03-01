@@ -23,10 +23,16 @@ const JobPage = () => {
   const searchQuery = searchParams.get("searchQuery") || "";
   const searchLocation = searchParams.get("searchLocation") || "";
   const industry = searchParams.get("industry") || "";
+  const minWage = searchParams.get("minWage") || "";
+  const maxWage = searchParams.get("maxWage") || "";
+  const type = searchParams.get("type") || "";
 
   useEffect(() => {
     setJobs(null)
-    if (searchQuery || searchLocation) {
+
+    if (minWage || maxWage || type) {
+      fetchFilteredJobs();
+    } else if (searchQuery || searchLocation) {
       fetchJobs();
     } else if (industry) {
       fetchIndustryJobs();
@@ -46,6 +52,23 @@ const JobPage = () => {
       }
     } catch (error) {
       console.error("Error fetching jobs:", error);
+    }
+  };
+
+  const fetchFilteredJobs = async () => {
+    try {
+      const response = await axiosInstance.get("/jobs/filteredJobs", {
+        params: { searchQuery, searchLocation, minWage, maxWage, type },
+      });
+  
+      if (response.data.rows?.length > 0) {
+        setJobs(response.data.rows);
+        setNoSearchResults(false);
+      } else {
+        setNoSearchResults(true);
+      }
+    } catch (error) {
+      console.error("Error fetching filtered jobs:", error);
     }
   };
 

@@ -25,6 +25,7 @@ import JobSuccess from './pages/employer/JobSuccess';
 import CreateApplication from 'pages/employer/CreateApplication';
 import ApplicationSuccess from 'pages/employer/ApplicationSuccess';
 import EmployerDashboard from './pages/employer/EmployerDashboard';
+import EmployerProfile from 'pages/employer/EmployerProfile';
 import EmployerSignup from './pages/employer/EmployerSignup';
 import EmployerLogin from './pages/employer/EmployerLogin';
 
@@ -63,6 +64,7 @@ const App = () => {
               <Route path="/employer/jobsuccess" element={<JobSuccess />} />
               <Route path="/employer/createapplication/:jobId" element={<CreateApplication />} />
               <Route path="/employer/applicationsuccess" element={<ApplicationSuccess />} />
+              <Route path="/employer/profile" element={<EmployerProfile />} />
             {/*</Route>*/}
 
              {/* Employer Public Routes */}

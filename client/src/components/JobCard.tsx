@@ -33,7 +33,6 @@ interface JobCardProps {
 
 const JobCard = ({ job, index, onClick }: JobCardProps) => {
   const [saveButton, setSaveButton] = useState("Save");
-  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleSaveJob = () => {
@@ -89,7 +88,7 @@ const JobCard = ({ job, index, onClick }: JobCardProps) => {
       <div className="flex gap-3 mt-6">
         <button
           onClick={() => {
-            navigate(`/jobapplication/${job.id}`);
+            window.open(`/jobapplication/${job.id}`, "_blank");
           }}
           className="flex-1 bg-teal-50 text-teal-600 px-4 py-3 rounded-xl hover:bg-teal-100 transition-all duration-300 font-medium flex items-center justify-center gap-2"
         >

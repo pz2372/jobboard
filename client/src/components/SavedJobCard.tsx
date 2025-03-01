@@ -16,14 +16,28 @@ import {
   AlertCircleIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "axiosInstance";
+import { useSelector } from "react-redux";
+import { RootState } from "redux/store";
+import { FormatDate } from "./methods/FormatDate";
 
 type SavedJobCardProps = {
   job: any;
   index: number;
+  removeJob: any;
 };
 
-const SavedJobCard = ({ job, index }: SavedJobCardProps) => {
-  const navigate = useNavigate()
+const SavedJobCard = ({ job, index, removeJob }: SavedJobCardProps) => {
+  const navigate = useNavigate();
+
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const handleDeleteSave = () => {
+    axiosInstance
+      .delete(`/savedjobs/${user.id}/${job.jobId}`)
+      .then((response) => removeJob(job.id))
+      .catch((error) => console.error(error));
+  };
 
   return (
     <div
@@ -42,7 +56,7 @@ const SavedJobCard = ({ job, index }: SavedJobCardProps) => {
         </div>
         <div className="flex items-center gap-2">
           <ClockIcon className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-500">{job.createdAt}</span>
+          <span className="text-sm text-gray-500">{FormatDate(job.createdAt)}</span>
         </div>
       </div>
       <div className="space-y-3">
@@ -58,11 +72,17 @@ const SavedJobCard = ({ job, index }: SavedJobCardProps) => {
         </div>
       </div>
       <div className="flex gap-2 mt-6">
-        <button onClick={()=>navigate(`/jobapplication/${job.id}`)} className="flex-1 bg-teal-50 text-teal-600 px-4 py-3 rounded-xl hover:bg-teal-100 transition-all duration-300 font-medium flex items-center justify-center gap-2">
+        <button
+          onClick={() => window.open(`/jobapplication/${job.id}`, "_blank")}
+          className="flex-1 bg-teal-50 text-teal-600 px-4 py-3 rounded-xl hover:bg-teal-100 transition-all duration-300 font-medium flex items-center justify-center gap-2"
+        >
           Apply Now
           <Send className="w-4 h-4" />
         </button>
-        <button className="px-4 py-3 rounded-xl border border-gray-200 hover:bg-red-50 transition-all duration-300">
+        <button
+          onClick={handleDeleteSave}
+          className="px-4 py-3 rounded-xl border border-gray-200 hover:bg-red-50 transition-all duration-300"
+        >
           <XIcon className="w-4 h-4 text-red-400" />
         </button>
       </div>

@@ -20,17 +20,21 @@ import { RootState } from "redux/store";
 import { useSelector } from "react-redux";
 import SavedJobCard from "../components/SavedJobCard";
 import AppliedJobCard from "components/AppliedJobCard";
+import AppliedApplicationPreviewModal from "components/AppliedApplicationPreviewModal";
 
 interface SavedJob {
+  id: number;
   title: string;
   company: string;
   location: string;
   minWage: number;
   maxWage: number;
   savedDate: string;
+  createdAt: string;
 }
 
 interface AppliedJob {
+  id: number;
   title: string;
   company: string;
   location: string;
@@ -38,12 +42,19 @@ interface AppliedJob {
   maxWage: number;
   appliedDate: string;
   status: string;
+  createdAt: string;
 }
 
 const HistoryPage = () => {
   const [activeTab, setActiveTab] = useState("saved");
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const [appliedJobData, setAppliedJobData] = useState<{
+    application: any;
+    basicFieldAnswers: any;
+    questionAnswers: any;
+  } | null>(null);
   const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
@@ -66,8 +77,25 @@ const HistoryPage = () => {
       });
   }, [user.id]);
 
+  const removeSavedJob = (id: number) => {
+    setSavedJobs((prevJobs) => {
+      const updatedJobs = prevJobs.filter((job) => job.id !== id);
+      return updatedJobs;
+    });
+  };
+
+  const handleViewApplication = (applicationId: number) => {
+    axiosInstance
+      .get(`/applications/getUserApplicationById/${applicationId}`)
+      .then((response) => {
+        setAppliedJobData(response.data.data);
+        setShowPreview(true);
+      })
+      .catch((error) => console.error(error));
+  };
+
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8">
+    <div>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4 text-teal-600 font-comic tracking-wide">
           Your Job History
@@ -108,22 +136,50 @@ const HistoryPage = () => {
         </div>
       </div>
 
-      {activeTab === "saved" && (
-        <div className="space-y-4">
-          {savedJobs.map((job, index) => (
-            <SavedJobCard job={job} index={index} key={index}/>
-          ))}
-        </div>
+      {appliedJobData && (
+        <AppliedApplicationPreviewModal
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+          basicFields={appliedJobData.application.basicFields}
+          documents={appliedJobData.application.documents}
+          questions={appliedJobData.application.questions}
+          basicFieldAnswers={appliedJobData.basicFieldAnswers}
+          questionAnswers={appliedJobData.questionAnswers}
+        />
       )}
 
-      {activeTab === "applied" && (
-        <div className="space-y-4">
-          {appliedJobs.map((job, index) => (
-            <AppliedJobCard job={job} index={index} key={index}/>
-          ))}
-        </div>
-      )}
-    </main>
+{activeTab === "saved" && (
+  <div className="space-y-4">
+    {savedJobs
+      .slice() // Make a copy to avoid mutating state
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Sort newest first
+      .map((job, index) => (
+        <SavedJobCard
+          job={job}
+          index={index}
+          key={index}
+          removeJob={removeSavedJob}
+        />
+      ))}
+  </div>
+)}
+
+{activeTab === "applied" && (
+  <div className="space-y-4">
+    {appliedJobs
+      .slice()
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map((job, index) => (
+        <AppliedJobCard
+          job={job}
+          index={index}
+          key={index}
+          viewApplication={handleViewApplication}
+        />
+      ))}
+  </div>
+)}
+    </div>
   );
 };
 

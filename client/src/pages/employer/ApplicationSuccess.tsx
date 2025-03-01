@@ -35,9 +35,15 @@ const ApplicationSuccess = ({ formData }: any) => {
   const [showPreview, setShowPreview] = useState(false);
   const location = useLocation();
   const { questions, basicFields, documents } = location.state;
-  const requiredDocuments = ""
-  const screeningQuestions = ""
-  const customQuestions = ""
+  const requiredDocuments =
+    (documents.resume.required ? "Resume" : "") +
+    (documents.resume.required && documents.coverLetter.required ? ", " : "") +
+    (documents.coverLetter.required ? "Cover Letter" : "");
+  let customQuestions = 0;
+
+  for (var i = 0; i < questions.length; i++) {
+    customQuestions++;
+  }
 
   return (
     <div className="max-w-3xl mx-auto mt-16 mb-16">
@@ -71,10 +77,6 @@ const ApplicationSuccess = ({ formData }: any) => {
           <p>
             <span className="font-medium">Required Fields:</span>{" "}
             {requiredDocuments}
-          </p>
-          <p>
-            <span className="font-medium">Screening Questions:</span>{" "}
-            {screeningQuestions}
           </p>
           <p>
             <span className="font-medium">Custom Questions:</span>{" "}
@@ -126,7 +128,7 @@ const ApplicationSuccess = ({ formData }: any) => {
           <p className="text-sm text-gray-600 mb-3">
             Preview how candidates will see your application form
           </p>
-          <button className="text-sm text-teal-600 hover:text-teal-700">
+          <button onClick={()=>setShowPreview(true)} className="text-sm text-teal-600 hover:text-teal-700">
             View application
           </button>
         </div>

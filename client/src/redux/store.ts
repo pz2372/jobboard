@@ -6,6 +6,7 @@ import authReducer from "./authSlice";
 import employerAuthReducer from "./employerAuthSlice";
 import profileReducer from "./profileSlice";
 import filterReducer from "./filterSlice"
+import { useDispatch } from "react-redux";
 
 const persistConfig = {
   key: "root",

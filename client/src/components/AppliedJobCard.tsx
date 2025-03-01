@@ -15,13 +15,15 @@ import {
   XIcon,
   AlertCircleIcon,
 } from "lucide-react";
+import { FormatDate } from "./methods/FormatDate";
 
 type AppliedJobCardProps = {
     job: any;
     index: number;
+    viewApplication: (applicationId: number) => void;
   };
 
-const AppliedJobCard = ({ job, index }: AppliedJobCardProps) => {
+const AppliedJobCard = ({ job, index, viewApplication }: AppliedJobCardProps) => {
 
   return (
     <div
@@ -65,10 +67,10 @@ const AppliedJobCard = ({ job, index }: AppliedJobCardProps) => {
         </div>
         <div className="text-gray-600 flex items-center gap-2">
           <ClockIcon className="w-4 h-4 text-gray-500" />
-          <span>Applied {job.createdAt}</span>
+          <span>Applied {FormatDate(job.createdAt)}</span>
         </div>
       </div>
-      <button className="w-full mt-6 bg-gray-50 text-gray-600 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-300 font-medium flex items-center justify-center gap-2">
+      <button onClick={()=>viewApplication(job.id)} className="w-full mt-6 bg-gray-50 text-gray-600 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-300 font-medium flex items-center justify-center gap-2">
         View Application
         <ArrowRight className="w-4 h-4" />
       </button>

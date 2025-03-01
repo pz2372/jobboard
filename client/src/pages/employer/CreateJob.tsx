@@ -78,7 +78,7 @@ const CreateJob = () => {
         setTimeout(() => {
           navigate("/employer/jobsuccess", {
             state: {
-              jobId: response.data,
+              jobId: response.data.newJob.id,
               title: jobData.title,
               location: jobData.city,
               type: jobData.type,

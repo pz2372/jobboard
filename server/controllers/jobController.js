@@ -88,16 +88,16 @@ exports.getJob = async (req, res) => {
 
 // Get all jobs with optional filters
 exports.getJobs = async (req, res) => {
-  const { title, location, minWage, maxWage, type, experience } = req.query;
+  const { searchQuery, searchLocation, minWage, maxWage, type, experience } = req.query;
 
   // Build filter conditions based on query parameters
   let filterConditions = {};
 
-  if (title && title.trim() !== "") {
-    filterConditions.title = { [Op.iLike]: `%${title}%` };
+  if (searchQuery && searchQuery.trim() !== "") {
+    filterConditions.searchQuery = { [Op.iLike]: `%${searchQuery}%` };
   }
-  if (location && location.trim() !== "") {
-    filterConditions.location = { [Op.iLike]: `%${location}%` };
+  if (searchLocation && searchLocation.trim() !== "") {
+    filterConditions.searchLocation = { [Op.iLike]: `%${searchLocation}%` };
   }
   if (minWage && maxWage) {
     filterConditions = {

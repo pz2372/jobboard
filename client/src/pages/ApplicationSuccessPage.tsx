@@ -93,7 +93,7 @@ const ApplicationSuccessPage = () => {
           </button>
           <button onClick={()=>navigate("/history")} className="flex-1 bg-teal-50 text-teal-600 px-4 py-3 rounded-xl hover:bg-teal-100 transition-all duration-300 font-medium flex items-center justify-center gap-2">
           <Home className="w-4 h-4" />
-          Go to Dashboard
+          Go to History
           </button>
         </div>
     </div>

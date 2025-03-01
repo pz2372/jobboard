@@ -42,7 +42,7 @@ const SettingsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       description: "Update your personal details",
       view: "personal",
     },
-    {
+    {/*{
       icon: <Eye className="w-5 h-5" />,
       title: "Profile Visibility",
       description: "Manage who can see your profile",
@@ -53,7 +53,7 @@ const SettingsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       title: "Notifications",
       description: "Choose what updates you receive",
       view: "notifications",
-    },
+    },*/}
   ];
   const renderView = () => {
     switch (currentView) {

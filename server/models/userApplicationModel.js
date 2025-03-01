@@ -53,6 +53,14 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      resume: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      coverLetter: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       basicFieldAnswers: {
         type: DataTypes.JSONB, 
         allowNull: false,

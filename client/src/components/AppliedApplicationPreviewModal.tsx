@@ -7,6 +7,8 @@ type PreviewModalProps = {
   basicFields: Record<string, { enabled: boolean; required: boolean }>;
   documents: Documents;
   questions: Question[];
+  basicFieldAnswers: [];
+  questionAnswers: [];
 };
 
 type Document = {
@@ -27,12 +29,14 @@ type Question = {
   options: string[];
 };
 
-const PreviewModal: React.FC<PreviewModalProps> = ({
+const AppliedApplicationPreviewModal: React.FC<PreviewModalProps> = ({
   isOpen,
   onClose,
   basicFields,
   documents,
   questions,
+  basicFieldAnswers,
+  questionAnswers,
 }) => {
   if (!isOpen) return null;
 
@@ -69,6 +73,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
                     </label>
                     <input
                       disabled
+                      value={basicFieldAnswers[key]}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                       placeholder={`Enter your ${key}`}
                     />
@@ -123,6 +128,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
                       disabled
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                       rows={3}
+                      value={questionAnswers[q.id]}
                       placeholder="Enter your answer"
                     />
                   )}
@@ -134,6 +140,8 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
                             type="radio"
                             disabled
                             name={`question-${q.id}`}
+                            value={option}
+                            checked={questionAnswers?.[q.id] === option}
                             className="h-4 w-4 text-teal-600 border-gray-300"
                           />
                           <label className="ml-2 text-sm text-gray-700">
@@ -150,6 +158,8 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
                           type="radio"
                           disabled
                           name={`question-${q.id}`}
+                          value="Yes"
+                          checked={questionAnswers?.[q.id] === "Yes"}
                           className="h-4 w-4 text-teal-600 border-gray-300"
                         />
                         <span className="ml-2 text-sm text-gray-700">Yes</span>
@@ -159,6 +169,8 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
                           type="radio"
                           disabled
                           name={`question-${q.id}`}
+                          value="No"
+                          checked={questionAnswers?.[q.id] === "No"}
                           className="h-4 w-4 text-teal-600 border-gray-300"
                         />
                         <span className="ml-2 text-sm text-gray-700">No</span>
@@ -175,4 +187,4 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
   );
 };
 
-export default PreviewModal;
+export default AppliedApplicationPreviewModal;

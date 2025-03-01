@@ -75,6 +75,7 @@ export const employerLogin = createAsyncThunk<
   }
 });
 
+
 export const employerAuthSlice = createSlice({
   name: "employerAuth",
   initialState,

@@ -51,6 +51,7 @@ import McDonaldsLogo from "../images/mcdonalds.png";
 import NikeLogo from "../images/nike.png";
 import WalmartLogo from "../images/walmart.png";
 import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "axiosInstance";
 
 const categories = [
   {
@@ -94,6 +95,8 @@ const HomePage = () => {
     placements: 0,
     satisfaction: 0,
   });
+  const [subscriberEmail, setSubscriberEmail] = useState("")
+  const [subsciberText, setSubscriberText] = useState("Subscribe")
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -116,6 +119,31 @@ const HomePage = () => {
     });
     return () => observer.disconnect();
   }, []);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+  
+    if (!subscriberEmail.trim()) {
+      setSubscriberText("Please enter a valid email");
+      return;
+    }
+  
+    try {
+      const response = await axiosInstance.post("/subscriber/add", {
+        email: subscriberEmail, 
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setSubscriberEmail(""); 
+      setSubscriberText("Subscribed!");
+    } catch (error) {
+      console.error("Subscription failed:", error);
+      setSubscriberText("Subscription failed. Try again.");
+    }
+  };
+
   const animateCounters = () => {
     const duration = 2000;
     const steps = 50;
@@ -349,13 +377,16 @@ const HomePage = () => {
             <input
               type="email"
               placeholder="Enter your email"
+              onChange={(e)=>setSubscriberEmail(e.target.value)}
               className="flex-1 px-6 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
-            <Link to="/employer/signup">
-              <button className="px-8 py-4 bg-white text-teal-600 rounded-full hover:bg-teal-50 transition-colors font-semibold flex items-center justify-center">
-                Subscribe <Send className="w-5 h-5 mx-1" />
-              </button>
-            </Link>
+
+            <button
+              onClick={handleSubscribe}
+              className="px-8 py-4 bg-white text-teal-600 rounded-full hover:bg-teal-50 transition-colors font-semibold flex items-center justify-center"
+            >
+              {subsciberText} <Send className="w-5 h-5 mx-1" />
+            </button>
           </form>
         </div>
       </section>

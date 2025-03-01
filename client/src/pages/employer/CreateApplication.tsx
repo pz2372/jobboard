@@ -298,11 +298,11 @@ const CreateApplication = () => {
       basicFields,
       documents,
       employerId: employer.id,
-      jobId,
+      jobId: Number(jobId),
     };
 
     axiosInstance
-      .post("/employerapplication/create", { data })
+      .post("/employerapplication/create", data)
       .then((response) =>
         navigate("/employer/applicationsuccess", {
           state: {
@@ -314,6 +314,7 @@ const CreateApplication = () => {
       )
       .catch((error) => console.error(error));
   };
+
 
   return (
     <div className="max-w-3xl mx-auto mt-16">

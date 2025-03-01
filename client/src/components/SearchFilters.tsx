@@ -12,11 +12,13 @@ type Filters = {
 type SearchFiltersProps = {
   isFilterOpen: boolean;
   setIsFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleApplyFilter: any;
 };
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
   isFilterOpen,
   setIsFilterOpen,
+  handleApplyFilter,
 }) => {
   const [filters, setFilters] = useState<Filters>({
     jobType: [],
@@ -180,7 +182,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           Clear All
         </button>
         <button
-          onClick={() => setIsFilterOpen(false)}
+          onClick={() => {
+            setIsFilterOpen(false);
+            handleApplyFilter(filters.minWage, filters.maxWage, filters.jobType);
+          }}
           className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-colors"
         >
           Apply Filters

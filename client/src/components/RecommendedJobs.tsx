@@ -13,7 +13,7 @@ const RecommendedJobs = ({ onClick }: { onClick: (job: Job) => void }) => {
         setJobs(response.data)
       })
       .catch((error) => console.error(error));
-  });
+  }, []);
 
   return (
     <div className="grid mt-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
