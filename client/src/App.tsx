@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import TermsPage from './pages/TermsPage';
+import CompanyPage from "./pages/CompanyPage"
 import ComingSoon from 'pages/ComingSoon';
 import FourZeroFour from 'pages/404';
 
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="/login" element={<RedirectIfLoggedIn><LoginPage /></RedirectIfLoggedIn>} />
             <Route path="/signup" element={<RedirectIfLoggedIn><SignupPage /></RedirectIfLoggedIn>} />
             <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+            <Route path="/company/:employerId" element={<CompanyPage />} />
             <Route path="/terms/:item" element={<TermsPage />} /> 
             <Route path="/comingsoon" element={<ComingSoon />} />
             <Route path="/404" element={<FourZeroFour />} />

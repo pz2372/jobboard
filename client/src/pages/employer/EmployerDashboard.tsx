@@ -45,8 +45,9 @@ const EmployerDashboard = () => {
     axiosInstance
       .get(`/employerapplication/employerAppliedApplications/${employer.id}`)
       .then((response) => {
-        console.log(response.data)
-        setApplications(response.data)})
+        console.log(response.data);
+        setApplications(response.data);
+      })
       .catch((error) => console.error(error));
   }, []);
 
@@ -155,6 +156,8 @@ const EmployerDashboard = () => {
               </tbody>
             </table>
           </div>
+
+          {jobs && <div className="text-center pt-5">No Job Postings</div>}
         </div>
 
         {isOpen && (
@@ -165,52 +168,58 @@ const EmployerDashboard = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             Recent Applicants
           </h2>
-          <div className="space-y-4">
-            {applications.map((applicant, index) => (
-              <div
-                key={index}
-                className="bg-white border border-gray-200 rounded-lg p-6 flex items-center justify-between"
-              >
-                <div className="flex items-center space-x-6">
-                  <div className="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0" />
-                  <div className="space-y-1">
-                    <h3 className="font-medium text-gray-900">{applicant.firstName} {applicant.lastName}</h3>
+          {applications ? (
+            <div className="text-center">No Recent Applicants</div>
+          ) : (
+            <div className="space-y-4">
+              {applications.map((applicant, index) => (
+                <div
+                  key={index}
+                  className="bg-white border border-gray-200 rounded-lg p-6 flex items-center justify-between"
+                >
+                  <div className="flex items-center space-x-6">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0" />
+                    <div className="space-y-1">
+                      <h3 className="font-medium text-gray-900">
+                        {applicant.firstName} {applicant.lastName}
+                      </h3>
 
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <MailIcon className="w-4 h-4 mr-2" />
-                        {applicant.email}
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <MailIcon className="w-4 h-4 mr-2" />
+                          {applicant.email}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <PhoneIcon className="w-4 h-4 mr-2" />
+                          {applicant.phoneNumber}
+                        </div>
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <PhoneIcon className="w-4 h-4 mr-2" />
-                        {applicant.phoneNumber}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <CalendarIcon className="w-4 h-4 mr-2" />
-                        Applied on {applicant.createdOn}
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <CalendarIcon className="w-4 h-4 mr-2" />
+                          Applied on {applicant.createdOn}
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <div className="flex flex-col space-y-2">
+                    <button className="inline-flex items-center px-4 py-2 text-sm text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors duration-200">
+                      <FileTextIcon className="w-4 h-4 mr-2" />
+                      View Application
+                    </button>
+                    <button className="inline-flex items-center px-4 py-2 text-sm text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors duration-200">
+                      <ExternalLinkIcon className="w-4 h-4 mr-2" />
+                      View Profile
+                    </button>
+                    <button className="inline-flex items-center px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200">
+                      <XIcon className="w-4 h-4 mr-2" />
+                      Decline
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-col space-y-2">
-                  <button className="inline-flex items-center px-4 py-2 text-sm text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors duration-200">
-                    <FileTextIcon className="w-4 h-4 mr-2" />
-                    View Application
-                  </button>
-                  <button className="inline-flex items-center px-4 py-2 text-sm text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors duration-200">
-                    <ExternalLinkIcon className="w-4 h-4 mr-2" />
-                    View Profile
-                  </button>
-                  <button className="inline-flex items-center px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200">
-                    <XIcon className="w-4 h-4 mr-2" />
-                    Decline
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

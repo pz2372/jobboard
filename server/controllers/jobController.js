@@ -18,24 +18,23 @@ exports.getSearchJobs = async (req, res) => {
   try {
     const { searchQuery, searchLocation } = req.query;
 
-    // Check if searchTerm is empty
     if (!searchQuery || searchQuery.trim() === "") {
-      return res.status(400).json({ message: "Search term is required" })
+      return res.status(400).json({ message: "Search term is required" });
     }
+
+    // Use websearch_to_tsquery for more natural search
+    const tsQuery = `websearch_to_tsquery('english', '${searchQuery}')`;
 
     // Build the query conditions
     const conditions = {
       [Op.and]: [
         {
           [Op.or]: [
-            // ILIKE for partial matching
-            { title: { [Op.iLike]: `%${searchQuery}%` } },
-            { description: { [Op.iLike]: `%${searchQuery}%` } },
-            // Full-text search
+            // Standard Full-Text Search (vector search with ranking)
             literal(
-              `"search_vector" @@ to_tsquery('english', '${searchQuery}')`
+              `search_vector @@ ${tsQuery}`
             ),
-            // Fuzzy matching using pg_trgm
+            // Fuzzy search (for typos and similar words)
             literal(`title % '${searchQuery}' OR description % '${searchQuery}'`),
           ],
         },
@@ -46,8 +45,19 @@ exports.getSearchJobs = async (req, res) => {
       conditions[Op.and].push({ location: { [Op.iLike]: `%${searchLocation}%` } });
     }
 
-    const jobs = await Job.findAndCountAll({
+    const jobs = await Job.findAll({
       where: conditions,
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "location",
+        "company",
+        "salary",
+        // Rank the search results based on relevance
+        [literal(`ts_rank(search_vector, ${tsQuery})`), "rank"],
+      ],
+      order: [[literal("rank"), "DESC"]], // Order by relevance score
     });
 
     res.json(jobs);

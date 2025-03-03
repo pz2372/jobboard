@@ -276,11 +276,11 @@ const CreateJob = () => {
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
-                <option value="">Select Level</option>
-                <option value="entry">Entry Level</option>
-                <option value="mid">Mid Level</option>
-                <option value="senior">Senior Level</option>
-                <option value="lead">Lead</option>
+                <option value="">Select Years</option>
+                <option value="No Experience">No Experience</option>
+                <option value="1 Year">1 Year</option>
+                <option value="2 Year">2 Years</option>
+                <option value="Over 3 Years">Over 3 Years</option>
               </select>
             </div>
           </div>

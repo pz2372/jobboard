@@ -34,8 +34,14 @@ interface JobCardProps {
 const JobCard = ({ job, index, onClick }: JobCardProps) => {
   const [saveButton, setSaveButton] = useState("Save");
   const user = useSelector((state: RootState) => state.auth.user);
+  const navigate = useNavigate()
 
   const handleSaveJob = () => {
+    if(!user){
+      navigate("/login")
+      return;
+    }
+
     axiosInstance
       .post("/savedjobs/add", { userId: user.id, jobId: job.id })
       .then((response) => {

@@ -70,7 +70,7 @@ const NavBar = () => {
               </Link>
               <div className="w-px h-6 bg-white/20 rounded-full"></div>
               <div
-               onClick={()=>handleLogout}
+               onClick={()=>handleLogout()}
                 className="flex items-center hover:cursor-pointer gap-2 text-white/90 font-medium group transition-all duration-300 hover:scale-110"
               >
                 <div className="relative">

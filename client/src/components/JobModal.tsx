@@ -11,10 +11,15 @@ import {
   GraduationCap,
   CheckCircle2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const parsedRequirements: string[] =
+  typeof job.requirements === "string"
+    ? job.requirements.replace(/[{}]/g, "").split(/",\s*"/).map(req => req.replace(/"/g, ''))
+    : [];
 
   return (
     <div className="fixed z-20 inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -27,7 +32,9 @@ const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
               </h2>
               <div className="flex items-center gap-2 text-gray-600">
                 <Building2 className="w-4 h-4" />
-                <span>{job.company}</span>
+                <Link to={`/company/${job.employerId}`}>
+                  <span>{job.company}</span>
+                </Link>
               </div>
             </div>
             <button
@@ -66,22 +73,23 @@ const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
             <p className="text-gray-600 leading-relaxed">{job.description}</p>
           </div>
 
-         {/*} <div>
+          <div>
             <h3 className="text-lg font-semibold mb-3">Requirements</h3>
             <ul className="space-y-3">
-              {job.requirements && job.requirements.map((req, index) => (
-                <li
-                  key={index}
-                  className="flex items-center gap-2 text-gray-600"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-teal-600 flex-shrink-0" />
-                  <span>{req}</span>
-                </li>
-              ))}
+              {job.requirements &&
+                parsedRequirements.map((req, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center gap-2 text-gray-600"
+                  >
+                    <CheckCircle2 className="w-5 h-5 text-teal-600 flex-shrink-0" />
+                    <span>{req as string}</span>
+                  </li>
+                ))}
             </ul>
           </div>
 
-          <div>
+          {/*<div>
             <h3 className="text-lg font-semibold mb-3">Schedule</h3>
             <div className="flex flex-wrap gap-3">
               {job.schedule.map((schedule, index) => (
@@ -98,7 +106,10 @@ const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
         </div>
 
         <div className="p-6 border-t border-gray-200">
-          <button onClick={()=>navigate(`/jobapplication/${job.id}`)} className="w-full bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-500 transition-all duration-300 font-medium flex items-center justify-center gap-2">
+          <button
+            onClick={() => navigate(`/jobapplication/${job.id}`)}
+            className="w-full bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-500 transition-all duration-300 font-medium flex items-center justify-center gap-2"
+          >
             Apply Now
             <Send className="w-4 h-4" />
           </button>
