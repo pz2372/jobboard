@@ -225,7 +225,9 @@ const ProfilePage = () => {
       if (action === "add") {
         newItems = [...updatedSection, value];
       } else if (action === "remove") {
-        newItems = updatedSection.filter((item) => item !== value);
+        // Ensure we're working with an array for filter operation
+        const arraySection = Array.isArray(updatedSection) ? updatedSection : [];
+        newItems = arraySection.filter((item) => item !== value);
       } else {
         newItems = updatedSection;
       }
@@ -243,7 +245,9 @@ const ProfilePage = () => {
       if (action === "add") {
         newItems = [...updatedSection, value];
       } else if (action === "remove") {
-        newItems = updatedSection.filter((item) => item !== value);
+        // Ensure we're working with an array for filter operation
+        const arraySection = Array.isArray(updatedSection) ? updatedSection : [];
+        newItems = arraySection.filter((item) => item !== value);
       } else if (action === "bio") {
         newItems = value; // This will be a string for bio
       } else {
