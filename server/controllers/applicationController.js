@@ -10,14 +10,7 @@ exports.getApplicationsByUser = async (req, res) => {
         {
           model: Job,
           as: "job",
-          attributes: [
-            "title",
-            "company",
-            "location",
-            "maxWage",
-            "minWage",
-            "description",
-          ],
+          // Remove specific attributes to get all job fields
         },
       ],
     });
@@ -53,32 +46,33 @@ exports.getApplicationByJobId = async (req, res) => {
 
 // Create applied application
 exports.createUserApplication = async (req, res) => {
-  const { applicationId, userId, jobId, employerId, basicFieldAnswers, questionAnswers } =
-    req.body;
+  const {
+    applicationId,
+    userId,
+    jobId,
+    employerId,
+    basicFieldAnswers,
+    questionAnswers,
+  } = req.body;
 
   try {
-    if (
-      !applicationId ||
-      !userId ||
-      !jobId ||
-      !basicFieldAnswers ||
-      !questionAnswers ||
-      !employerId
-    ) {
+    if (!userId || !jobId || !employerId) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const application = await Application.findByPk(applicationId);
-    if (!application) {
-      return res.status(404).json({ message: "Application not found." });
+    if (applicationId) {
+      const application = await Application.findByPk(applicationId);
+      if (!application) {
+        return res.status(404).json({ message: "Application not found." });
+      }
     }
-
+    
     const user = await UserAccount.findByPk(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const status = "Active"
+    const status = "Active";
 
     const newAnswer = await UserApplication.create({
       applicationId,
@@ -139,7 +133,7 @@ exports.getUserApplicationById = async (req, res) => {
 
   try {
     const answers = await UserApplication.findOne({
-      where: { id  },
+      where: { id },
       include: [
         {
           model: Application,
@@ -159,5 +153,81 @@ exports.getUserApplicationById = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error." });
+  }
+};
+
+// Apply for a job (new efficient endpoint)
+exports.applyForJob = async (req, res) => {
+  const { jobId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    if (!userId || !jobId) {
+      return res.status(400).json({ message: "User ID and Job ID are required." });
+    }
+
+    // Check if user exists
+    const user = await UserAccount.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Check if job exists
+    const job = await Job.findByPk(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+
+    // Debug: Log job object to see what fields are available
+    console.log("Job object:", JSON.stringify(job.toJSON(), null, 2));
+
+    // Ensure job has employerId
+    if (!job.employerId) {
+      return res.status(400).json({ message: "Job does not have an associated employer." });
+    }
+
+    // Check if user has already applied for this job
+    const existingApplication = await UserApplication.findOne({
+      where: { userId, jobId }
+    });
+
+    if (existingApplication) {
+      return res.status(409).json({ message: "You have already applied for this job." });
+    }
+
+    // Check if there's a custom application for this job
+    const customApplication = await Application.findOne({
+      where: { jobId },
+      include: [{ model: Job, as: "job" }],
+    });
+
+    if (customApplication) {
+      // Job has custom application requirements - user needs to fill out more info
+      return res.status(200).json({
+        needsMoreInfo: true,
+        application: customApplication,
+        message: "Additional information required for this application."
+      });
+    } else {
+      // No custom application - create user application directly
+      const newUserApplication = await UserApplication.create({
+        applicationId: null,
+        userId,
+        employerId: job.employerId,
+        status: "Active",
+        jobId,
+        basicFieldAnswers: null,
+        questionAnswers: null,
+      });
+
+      return res.status(201).json({
+        needsMoreInfo: false,
+        application: newUserApplication,
+        message: "Application submitted successfully."
+      });
+    }
+  } catch (error) {
+    console.error("Error applying for job:", error);
+    return res.status(500).json({ message: "Server error.", error: error.message });
   }
 };

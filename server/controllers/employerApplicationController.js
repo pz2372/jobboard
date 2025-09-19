@@ -4,6 +4,7 @@ const {
   EmployerAccount,
   UserAccount,
   UserApplication,
+  UserProfile,
 } = require("../models");
 const { Op, Sequelize } = require("sequelize");
 
@@ -13,7 +14,7 @@ exports.getApplications = async (req, res) => {
     const application = await Application.findAll({
       include: [
         {
-          model: Employer,
+          model: EmployerAccount,
           attributes: ["id", "name"],
         },
         {
@@ -31,7 +32,6 @@ exports.getApplications = async (req, res) => {
     });
   }
 };
-
 
 // Create application
 exports.createApplication = async (req, res) => {
@@ -69,7 +69,6 @@ exports.createApplication = async (req, res) => {
   }
 };
 
-
 // Get applied applications for employer
 exports.getEmployerAppliedApplications = async (req, res) => {
   const { employerId } = req.params;
@@ -83,42 +82,62 @@ exports.getEmployerAppliedApplications = async (req, res) => {
   try {
     const appliedJobs = await UserApplication.findAll({
       where: { employerId },
-      attributes: ["id", "applicationId"],
+      attributes: [
+        "id", 
+        "applicationId", 
+        "userId", 
+        "employerId", 
+        "jobId", 
+        "status", 
+        "resume", 
+        "coverLetter", 
+        "basicFieldAnswers", 
+        "questionAnswers", 
+        "acceptedDate",
+        "createdAt", 
+        "updatedAt"
+      ],
       include: [
         {
           model: Job,
           as: "job",
-          attributes: ["title"],
+          attributes: ["id", "title", "location", "status"],
+          required: false, // Changed to false to include records even if job is null
+        },
+        {
+          model: Application,
+          as: "application",
+          attributes: ["id", "questions", "basicFields", "documents"],
+          required: false, // Changed to false to include records even if job is null
         },
         {
           model: UserAccount,
           as: "user",
           attributes: ["id", "firstName", "lastName", "email"],
+          required: false, // Changed to false to include records even if user is null
+          include: [
+            {
+              model: UserProfile,
+              as: "profile", // Adjust this alias based on your model associations
+              required: false, // Include even if profile doesn't exist
+            },
+          ],
         },
       ],
     });
+
+    // Debug: Check specific job IDs that are returning null
+    const jobIds = appliedJobs
+      .map((app) => app.jobId)
+      .filter((id, index, self) => self.indexOf(id) === index);
+
 
     if (!appliedJobs || appliedJobs.length === 0) {
       return res.status(200).json([]);
     }
 
-    const response = appliedJobs.map((appliedJob) => ({
-      Id: appliedJob.id,
-      jobId: appliedJob.job.id,
-      title: appliedJob.job.title,
-      location: appliedJob.job.location,
-      applicationId: appliedJob.applicationId,
-      userId: appliedJob.user.id,
-      user: {
-        id: appliedJob.user.id,
-        firstName: appliedJob.user.firstName,
-        lastName: appliedJob.user.lastName,
-        email: appliedJob.user.email,
-      },
-      createdOn: appliedJob.createdAt,
-    }));
 
-    res.status(200).json(response);
+    res.status(200).json(appliedJobs);
   } catch (error) {
     console.error(
       "Error fetching applications for employerId:",
@@ -129,21 +148,23 @@ exports.getEmployerAppliedApplications = async (req, res) => {
   }
 };
 
-// Soft delete an applied job (set deletedOn date)
+// Soft delete an applied job (set status to Delete)
 exports.deleteAppliedJob = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [updated] = await AppliedJobs.update(
-      { deletedOn: new Date() },
-      { where: { id } }
-    );
+    const appliedJob = await UserApplication.findByPk(id);
 
-    if (updated === 0) {
+    if (!appliedJob) {
       return res.status(404).json({ message: "Applied job not found" });
     }
 
-    res.status(200).json({ message: "Applied job soft deleted successfully" });
+    await appliedJob.update({
+      status: "Closed",
+      updatedAt: new Date(),
+    });
+
+    res.status(200).json({ message: "Applied job deleted successfully" });
   } catch (error) {
     console.error("Error deleting applied job:", error);
     res.status(500).json({ message: "Server error" });
@@ -152,22 +173,75 @@ exports.deleteAppliedJob = async (req, res) => {
 
 // Update an applied job (e.g., change status or update details)
 exports.updateAppliedJob = async (req, res) => {
-  const { jobId } = req.params;
-  const { status, applicationId } = req.body;
+  const { id } = req.params;
+  const { status } = req.body;
 
   try {
-    const [updated] = await AppliedJobs.update(
-      { status, applicationId, updatedOn: new Date() },
-      { where: { jobId } }
-    );
+    const appliedJob = await UserApplication.findByPk(id);
 
-    if (updated === 0) {
+    if (!appliedJob) {
       return res.status(404).json({ message: "Applied job not found" });
     }
 
-    res.status(200).json({ message: "Applied job updated successfully" });
+    // Prepare update data
+    const updateData = {
+      status,
+      updatedAt: new Date(),
+    };
+
+    // If status is being changed to "Accepted", set the acceptedDate
+    if (status === "Accepted") {
+      updateData.acceptedDate = new Date();
+      
+      // Close the job when an applicant is accepted
+      await Job.update(
+        { status: "Closed" },
+        { where: { id: appliedJob.jobId } }
+      );
+    }
+
+    await appliedJob.update(updateData);
+
+    res.status(200).json({
+      message: "Applied job updated successfully",
+      data: appliedJob,
+    });
   } catch (error) {
     console.error("Error updating applied job:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Accept an application (dedicated method)
+exports.acceptApplication = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const appliedJob = await UserApplication.findByPk(id);
+
+    if (!appliedJob) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    // Update the application status to "Accepted" and set acceptedDate
+    await appliedJob.update({
+      status: "Accepted",
+      acceptedDate: new Date(),
+      updatedAt: new Date(),
+    });
+
+    // Close the job when an applicant is accepted
+    await Job.update(
+      { status: "Closed" },
+      { where: { id: appliedJob.jobId } }
+    );
+
+    res.status(200).json({
+      message: "Application accepted successfully",
+      data: appliedJob,
+    });
+  } catch (error) {
+    console.error("Error accepting application:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

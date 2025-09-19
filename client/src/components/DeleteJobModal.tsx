@@ -3,17 +3,24 @@ import { AlertCircle } from "lucide-react";
 import axiosInstance from "axiosInstance";
 
 type DeleteJobModalProps = {
-    jobId: number;
+    job: any;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    handleDeleteJob: (number) => void;
   };
   
-  const DeleteJobModal: React.FC<DeleteJobModalProps> = ({ jobId, setIsOpen }) => {
-    const handleDeleteJob = () => {
-        axiosInstance.delete(`employerjob/${jobId}`)
+  const DeleteJobModal: React.FC<DeleteJobModalProps> = ({ job, setIsOpen, handleDeleteJob }) => {
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsOpen(false);
     }
+  };
 
   return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+          onClick={handleBackdropClick}
+        >
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center space-x-3">
@@ -21,12 +28,12 @@ type DeleteJobModalProps = {
                   <AlertCircle className="w-5 h-5 text-red-600" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Delete Job
+                  Delete {job?.title || 'Job'}
                 </h2>
               </div>
 
               <p className="mt-4 text-sm text-gray-600">
-                Are you sure you want to delete this job? This action cannot be
+                Are you sure you want to delete "{job?.title || 'this job'}"? This action cannot be
                 undone.
               </p>
 
@@ -38,7 +45,7 @@ type DeleteJobModalProps = {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {handleDeleteJob(); setIsOpen(false)}}
+                  onClick={() => {handleDeleteJob(job?.id); setIsOpen(false)}}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
                   Delete

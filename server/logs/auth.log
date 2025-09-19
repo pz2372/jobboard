@@ -1,0 +1,9 @@
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-06T20:11:59.664Z","url":"/me"}
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-06T20:12:03.217Z","url":"/me"}
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-06T20:12:11.715Z","url":"/me"}
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-06T20:12:12.522Z","url":"/me"}
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-06T20:12:47.937Z","url":"/me"}
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-07T01:00:45.788Z","url":"/me"}
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-07T01:04:14.106Z","url":"/me"}
+{"ip":"::1","level":"info","message":"Authentication successful","method":"GET","service":"auth-middleware","timestamp":"2025-09-07T02:09:49.408Z","url":"/me"}
+{"ip":"::1","level":"warn","message":"Authentication failed: No token provided","method":"GET","service":"auth-middleware","timestamp":"2025-09-07T02:47:32.943Z","url":"/me","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"}

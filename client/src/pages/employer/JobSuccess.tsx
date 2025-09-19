@@ -35,7 +35,7 @@ const JobSuccess = () => {
 
   return (
     <div className="w-full min-h-screen px-4 py-8">
-      <div className="max-w-3xl mx-auto mt-16">
+      <div className="max-w-3xl mx-auto mt-5">
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
@@ -45,10 +45,6 @@ const JobSuccess = () => {
               Job Successfully Posted!
             </h1>
           </div>
-          <p className="text-gray-600">
-            Your job listing is now live. Next, choose how you'd like to handle
-            applications.
-          </p>
         </div>
 
         <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -71,7 +67,7 @@ const JobSuccess = () => {
           </div>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-12">
           <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-8 border-2 border-transparent cursor-pointer transition-all">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
@@ -82,7 +78,7 @@ const JobSuccess = () => {
               </h3>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              Create a tailored application form with custom questions and
+              Require further questions for applicants? Create a tailored application form with custom questions and
               specific requirements for your role.
             </p>
             <ul className="text-sm text-gray-600 space-y-2">
@@ -103,14 +99,19 @@ const JobSuccess = () => {
         </div>
 
         <div className="flex items-center justify-center space-x-4">
-          <button
-            onClick={() => {
-              navigate("/employer");
-            }}
-            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
-          >
-            Go to Dashboard
-          </button>
+          <div className="relative">
+            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-sm text-center font-semibold text-gray-700">
+              Recommended
+            </div>
+            <button
+              onClick={() => {
+                navigate("/employer");
+              }}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+            >
+              Quick Apply Only
+            </button>
+          </div>
           <button
             onClick={() => {
               navigate(`/employer/createapplication/${jobId}`);

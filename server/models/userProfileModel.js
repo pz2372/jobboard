@@ -17,8 +17,12 @@ module.exports = (sequelize) => {
       profileImage: {
         type: DataTypes.STRING,
         allowNull: true,
+      }, 
+      state: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      location: {
+      city: {
         type: DataTypes.STRING,
         allowNull: true,
       },
@@ -61,6 +65,12 @@ module.exports = (sequelize) => {
         type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true,
       },
+      portfolioVideos: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+        defaultValue: [],
+        comment: 'Array of video URLs. Max 4 videos.'
+      },
     },
     {
       tableName: "user_profiles",
@@ -72,6 +82,12 @@ module.exports = (sequelize) => {
     UserProfile.belongsTo(models.UserAccount, {
       foreignKey: "userId",
       as: "user",
+    });
+    
+    UserProfile.hasMany(models.UserSocialMedia, {
+      foreignKey: "userProfileId",
+      as: "socialMedia",
+      onDelete: 'CASCADE'
     });
   };
 

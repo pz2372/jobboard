@@ -6,32 +6,44 @@ import authReducer from "./authSlice";
 import employerAuthReducer from "./employerAuthSlice";
 import profileReducer from "./profileSlice";
 import filterReducer from "./filterSlice"
-import { useDispatch } from "react-redux";
+import historyReducer from "./historySlice";
+import searchReducer from "./searchSlice";
+import subscriptionReducer from "./subscriptionSlice";
 
 const persistConfig = {
   key: "root",
   storage,
 };
 
-const employerPersistConfig = {
-  key: "employerAuth",
+const historyPersistConfig = {
+  key: "history",
   storage,
 };
 
+// Remove employer auth persistence since we're using httpOnly cookies
+// const employerPersistConfig = {
+//   key: "employerAuth",
+//   storage,
+// };
+
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
-const persistedEmployerAuthReducer = persistReducer(employerPersistConfig, employerAuthReducer);
+const persistedHistoryReducer = persistReducer(historyPersistConfig, historyReducer);
+// const persistedEmployerAuthReducer = persistReducer(employerPersistConfig, employerAuthReducer);
 
 
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
-    employerAuth: persistedEmployerAuthReducer,
+    employerAuth: employerAuthReducer, // No persistence for employer auth
     profile: profileReducer,
     filter: filterReducer,
+    history: persistedHistoryReducer, // Now persisted!
+    search: searchReducer, // In-memory only - clears on refresh
+    subscription: subscriptionReducer, // No persistence - uses httpOnly cookies and tokens
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // Required for redux-persist
+      serializableCheck: false,
     }),
 });
 

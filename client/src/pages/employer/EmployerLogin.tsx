@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { UserCircle, BriefcaseIcon, LockIcon, MailIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { employerLogin, employerLogout } from "../../redux/employerAuthSlice";
+import { employerLogin } from "../../redux/employerAuthSlice";
 import type { AppDispatch } from "../../redux/store";
 
 const EmployerLogin = () => {
@@ -58,7 +58,7 @@ const EmployerLogin = () => {
           <form className="space-y-6" onSubmit={handleEmployerLogin}>
             <div className="grid grid-cols-1 gap-6">
               <div className="relative">
-                <MailIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                <MailIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                 <input
                   type="email"
                   name="email"
@@ -70,7 +70,7 @@ const EmployerLogin = () => {
               </div>
 
               <div className="relative">
-                <LockIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                <LockIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                 <input
                   type="password"
                   name="password"

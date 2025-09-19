@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      company: {
+      companyName: {
         type: DataTypes.STRING,
         allowNull: true,
       },
@@ -36,23 +36,6 @@ module.exports = (sequelize) => {
       state: {
         type: DataTypes.STRING,
         allowNull: true,
-      },
-      minWage: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      maxWage: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-          isGreaterThanMinWage(value) {
-            if (value < this.minWage) {
-              throw new Error(
-                "maxWage must be greater than or equal to minWage"
-              );
-            }
-          },
-        },
       },
       type: {
         type: DataTypes.STRING,
@@ -75,6 +58,10 @@ module.exports = (sequelize) => {
         allowNull: true,
       },
       logo: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      jobImage: {
         type: DataTypes.STRING,
         allowNull: true,
       },
@@ -102,11 +89,25 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "EmployerAccounts", // Ensure this matches the EmployerAccount table name
+          model: "EmployerAccounts", 
           key: "id",
         },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
+      },
+      payRate: {
+        type: DataTypes.NUMERIC(10, 2), // PostgreSQL NUMERIC for exact decimal precision
+        allowNull: false,
+      },
+      payFrequency: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      search_vector: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return null; // Virtual fields do not have a value in Sequelize
+        },
       },
     },
     {
@@ -123,15 +124,6 @@ module.exports = (sequelize) => {
       });
     } else {
       console.warn("models.SavedJobs is not defined.");
-    }
-
-    if (models.AppliedJobs) {
-      Job.hasMany(models.AppliedJobs, {
-        foreignKey: "jobId",
-        as: "appliedJobs",
-      });
-    } else {
-      console.warn("models.AppliedJobs is not defined.");
     }
 
     if (models.EmployerAccount) {

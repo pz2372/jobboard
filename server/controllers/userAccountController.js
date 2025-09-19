@@ -1,5 +1,5 @@
-const { UserAccount } = require("../models");
-const bcrypt = require("bcrypt");
+const { UserAccount, UserProfile, UserApplication, SavedJobs } = require("../models");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.createUserAccount = async (req, res) => {
@@ -79,7 +79,27 @@ exports.loginUserAccount = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ message: "Login successful", token, user });
+    // Fetch additional data directly from the database
+    const userProfile = await UserProfile.findOne({
+      where: { userId: user.id },
+    });
+
+    const appliedJobs = await UserApplication.findAll({
+      where: { userId: user.id },
+    });
+
+    const savedJobs = await SavedJobs.findAll({
+      where: { userId: user.id },
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user,
+      userProfile,
+      appliedJobs,
+      savedJobs
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

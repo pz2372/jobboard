@@ -1,8 +1,7 @@
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/db");
 
 module.exports = (sequelize) => {
-  AppliedJobs = sequelize.define(
+  const AppliedJobs = sequelize.define(
     "AppliedJobs",
     {
       id: {
@@ -43,10 +42,9 @@ module.exports = (sequelize) => {
       },
     },
     {
-      sequelize,
-      modelName: "AppliedJobs",
-      tableName: "applied_jobs",
+      tableName: "user_applications", // Specify the correct table name
       timestamps: true,
+      paranoid: true,
     }
   );
 
@@ -56,17 +54,13 @@ module.exports = (sequelize) => {
         foreignKey: "jobId",
         as: "job",
       });
-    } else {
-      console.warn("models.Job is not defined.");
     }
-  
+
     if (models.UserAccount) {
       AppliedJobs.belongsTo(models.UserAccount, {
         foreignKey: "userId",
         as: "user",
       });
-    } else {
-      console.warn("models.UserAccount is not defined.");
     }
   };
 

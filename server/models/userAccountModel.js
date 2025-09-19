@@ -64,14 +64,6 @@ module.exports = (sequelize) => {
       console.warn("models.SavedJobs is not defined.");
     }
 
-    if (models.AppliedJobs) {
-      UserAccount.hasMany(models.AppliedJobs, {
-        foreignKey: "jobId",
-        as: "appliedJobs",
-      });
-    } else {
-      console.warn("models.AppliedJobs is not defined.");
-    }
     UserAccount.hasMany(models.UserApplication, {
       foreignKey: "applicationId",
       as: "userApplication",

@@ -2,7 +2,8 @@ export interface Job {
     id: number,
       title: string,
       status?: string,
-      company: string,
+      company?: string, // Keep for backward compatibility
+      companyName: string, // New field
       location: string,
       address: string,
       city: string,

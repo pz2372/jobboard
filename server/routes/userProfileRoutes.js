@@ -1,11 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const userProfileController = require('../controllers/userProfileController');
-const upload = require('../middleware/uploadMiddleware');
+const processFileUpload = require('../middleware/uploadMiddleware');
+const videoUploadMiddleware = require('../middleware/videoUploadMiddleware');
 
-router.post('/profile', upload.single('profileImage'), userProfileController.createUserProfile);
+router.post('/profile', userProfileController.createUserProfile);
 router.get('/:userId', userProfileController.getUserProfile);
 router.put('/:userId', userProfileController.updateUserProfile);
-router.put('/picture/:userId', upload.single('file'), userProfileController.updateUserProfilePicture);
+router.put('/picture/:userId', processFileUpload, userProfileController.updateUserProfilePicture);
+
+// Portfolio video routes
+router.get('/:userId/videos', userProfileController.getPortfolioVideos);
+router.post('/:userId/videos', userProfileController.addPortfolioVideo);
+router.post('/:userId/videos/upload', videoUploadMiddleware, userProfileController.uploadPortfolioVideo);
+router.delete('/:userId/videos/:videoUrl', userProfileController.removePortfolioVideo);
 
 module.exports = router;

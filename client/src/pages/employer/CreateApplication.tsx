@@ -1,25 +1,16 @@
 import React, { useState } from "react";
 import {
   PlusIcon,
-  UserIcon,
-  MailIcon,
   PhoneIcon,
   FileTextIcon,
-  ListChecksIcon,
   XIcon,
   SaveIcon,
   EyeIcon,
   TrashIcon,
   GripVerticalIcon,
-  AlertCircleIcon,
   CalendarIcon,
-  BuildingIcon,
-  GlobeIcon,
-  LinkedinIcon,
   MapPinIcon,
-  ClockIcon,
   GraduationCapIcon,
-  UserCircleIcon,
 } from "lucide-react";
 import PreviewModal from "components/PreviewModal";
 import { fullQuestionPool } from "components/FullQuestionPool";
@@ -30,7 +21,7 @@ import { RootState } from "redux/store";
 import { useSelector } from "react-redux";
 
 type Document = {
-  required: boolean;
+  enabled: boolean;
   maxSize: string;
   allowedTypes: string[];
 };
@@ -43,7 +34,6 @@ type Question = {
   id: number;
   type: "text" | "multiple" | "yesno";
   question: string;
-  required: boolean;
   options: string[];
 };
 
@@ -56,17 +46,16 @@ const CreateApplication = () => {
   const employer = useSelector(
     (state: RootState) => state.employerAuth.employer
   );
-  const [currentStep] = useState(2);
   const [showPreview, setShowPreview] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [documents, setDocuments] = useState<Documents>({
     resume: {
-      required: true,
+      enabled: false,
       maxSize: "5MB",
       allowedTypes: ["PDF", "DOC", "DOCX"],
     },
     coverLetter: {
-      required: false,
+      enabled: false,
       maxSize: "5MB",
       allowedTypes: ["PDF", "DOC", "DOCX"],
     },
@@ -75,75 +64,50 @@ const CreateApplication = () => {
     id: 0,
     type: "text",
     question: "",
-    required: false,
     options: [""],
   });
   const [usedQuestions, setUsedQuestions] = useState(new Set());
   const [basicFields, setBasicFields] = useState({
-    fullName: {
-      enabled: true,
-      required: true,
-    },
-    email: {
-      enabled: true,
-      required: true,
-    },
+
     phone: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     address: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     city: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     state: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     zipCode: {
-      enabled: true,
-      required: false,
-    },
-    linkedin: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     website: {
-      enabled: true,
-      required: false,
-    },
-    currentCompany: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     yearsExperience: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     educationLevel: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     pronouns: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
     startDate: {
-      enabled: true,
-      required: false,
+      enabled: false,
     },
   });
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const toggleField = (field, type) => {
+  const toggleField = (field) => {
     setBasicFields((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
-        [type]: !prev[field][type],
+        enabled: !prev[field].enabled,
       },
     }));
   };
@@ -155,7 +119,7 @@ const CreateApplication = () => {
       ...prev,
       [documentType]: {
         ...prev[documentType],
-        required: !prev[documentType].required,
+        enabled: !prev[documentType].enabled,
       },
     }));
   };
@@ -172,17 +136,16 @@ const CreateApplication = () => {
   const handleAddQuestion = () => {
     if (newQuestion.question.trim()) {
       setQuestions([
-        ...questions,
         {
           ...newQuestion,
           id: Date.now(),
         },
+        ...questions,
       ]);
       setNewQuestion({
         id: Date.now(),
-        type: "text",
+        type: newQuestion.type, // Preserve the current type selection
         question: "",
-        required: false,
         options: [""],
       });
     }
@@ -280,7 +243,6 @@ const CreateApplication = () => {
           id: Date.now(),
           type: "text",
           question,
-          required: false,
           options: [""],
         },
       ]);
@@ -300,9 +262,19 @@ const CreateApplication = () => {
       employerId: employer.id,
       jobId: Number(jobId),
     };
+    
+    const hasEnabledBasicField = Object.values(basicFields).some((field) => field.enabled);
+    const hasDocuments = documents && (documents.resume?.enabled || documents.coverLetter?.enabled);
+    const hasQuestions = questions && questions.length > 0;
+
+    if (!hasEnabledBasicField && !hasDocuments && !hasQuestions) {
+      setErrorMessage("Please enable at least one basic field, add a document, or include a question.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
 
     axiosInstance
-      .post("/employerapplication/create", data)
+      .post("/employerapplications/create", data)
       .then((response) =>
         navigate("/employer/applicationsuccess", {
           state: {
@@ -315,15 +287,20 @@ const CreateApplication = () => {
       .catch((error) => console.error(error));
   };
 
-
   return (
-    <div className="max-w-3xl mx-auto mt-16">
-      <div className="ml-5 flex items-center justify-between mb-8">
+    <div className="max-w-3xl mx-auto mt-10">
+      <div className="ml-5 mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           Application Setup
         </h1>
-        <p className="text-sm text-gray-500">*Toggle to make fields required</p>
+        <p className="text-sm text-red-500 mt-5">*Toggle to add field to application</p>
       </div>
+
+      {errorMessage && (
+        <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
 
       <div className="space-y-6">
         <div className="space-y-6">
@@ -332,12 +309,6 @@ const CreateApplication = () => {
               <h2 className="text-lg font-medium text-gray-900">
                 Basic Information
               </h2>
-              <button
-                className="text-sm text-teal-600 hover:text-teal-700"
-                onClick={() => {}}
-              >
-                Manage Fields
-              </button>
             </div>
 
             <div className="space-y-6">
@@ -348,87 +319,81 @@ const CreateApplication = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Full Name{" "}
-                        {basicFields.fullName.required && (
-                          <span className="text-red-500">*</span>
-                        )}
+                        Current Education
                       </label>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           className="sr-only peer"
-                          checked={basicFields.fullName.required}
-                          onChange={() => toggleField("fullName", "required")}
+                          checked={basicFields.educationLevel.enabled}
+                          onChange={() => toggleField("educationLevel")}
                         />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                       </label>
                     </div>
-                    <div className="relative">
-                      <UserIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        required={basicFields.fullName.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                    </div>
+                    {basicFields.educationLevel.enabled && (
+                      <div className="relative">
+                        <GraduationCapIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Email{" "}
-                        {basicFields.email.required && (
-                          <span className="text-red-500">*</span>
-                        )}
+                        Availability Start Date
                       </label>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           className="sr-only peer"
-                          checked={basicFields.email.required}
-                          onChange={() => toggleField("email", "required")}
+                          checked={basicFields.startDate.enabled}
+                          onChange={() => toggleField("startDate")}
                         />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                       </label>
                     </div>
-                    <div className="relative">
-                      <MailIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="email"
-                        required={basicFields.email.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                    </div>
+                    {basicFields.startDate.enabled && (
+                      <div className="relative">
+                        <CalendarIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="date"
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Phone Number{" "}
-                        {basicFields.phone.required && (
-                          <span className="text-red-500">*</span>
-                        )}
+                        Phone Number
                       </label>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           className="sr-only peer"
-                          checked={basicFields.phone.required}
-                          onChange={() => toggleField("phone", "required")}
+                          checked={basicFields.phone.enabled}
+                          onChange={() => toggleField("phone")}
                         />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                       </label>
                     </div>
-                    <div className="relative">
-                      <PhoneIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="tel"
-                        required={basicFields.phone.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                    </div>
+                    {basicFields.phone.enabled && (
+                      <div className="relative">
+                        <PhoneIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="tel"
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -441,238 +406,98 @@ const CreateApplication = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Street Address{" "}
-                        {basicFields.address.required && (
-                          <span className="text-red-500">*</span>
-                        )}
+                        Street Address
                       </label>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           className="sr-only peer"
-                          checked={basicFields.address.required}
-                          onChange={() => toggleField("address", "required")}
+                          checked={basicFields.address.enabled}
+                          onChange={() => toggleField("address")}
                         />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                       </label>
                     </div>
-                    <div className="relative">
-                      <MapPinIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    {basicFields.address.enabled && (
+                      <div className="relative">
+                        <MapPinIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        City
+                      </label>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={basicFields.city.enabled}
+                          onChange={() => toggleField("city")}
+                        />
+                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                      </label>
+                    </div>
+                    {basicFields.city.enabled && (
                       <input
                         type="text"
-                        required={basicFields.address.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                       />
-                    </div>
+                    )}
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        City{" "}
-                        {basicFields.city.required && (
-                          <span className="text-red-500">*</span>
-                        )}
+                        State
                       </label>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           className="sr-only peer"
-                          checked={basicFields.city.required}
-                          onChange={() => toggleField("city", "required")}
+                          checked={basicFields.state.enabled}
+                          onChange={() => toggleField("state")}
                         />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                       </label>
                     </div>
-                    <input
-                      type="text"
-                      required={basicFields.city.required}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        State{" "}
-                        {basicFields.state.required && (
-                          <span className="text-red-500">*</span>
-                        )}
-                      </label>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={basicFields.state.required}
-                          onChange={() => toggleField("state", "required")}
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      required={basicFields.state.required}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        ZIP Code{" "}
-                        {basicFields.zipCode.required && (
-                          <span className="text-red-500">*</span>
-                        )}
-                      </label>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={basicFields.zipCode.required}
-                          onChange={() => toggleField("zipCode", "required")}
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      required={basicFields.zipCode.required}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Professional Information Group */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-gray-700 border-b pb-2">
-                  Professional Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Current Company{" "}
-                        {basicFields.currentCompany.required && (
-                          <span className="text-red-500">*</span>
-                        )}
-                      </label>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={basicFields.currentCompany.required}
-                          onChange={() =>
-                            toggleField("currentCompany", "required")
-                          }
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
-                      </label>
-                    </div>
-                    <div className="relative">
-                      <BuildingIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    {basicFields.state.enabled && (
                       <input
                         type="text"
-                        required={basicFields.currentCompany.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                       />
-                    </div>
+                    )}
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Years of Experience{" "}
-                        {basicFields.yearsExperience.required && (
-                          <span className="text-red-500">*</span>
-                        )}
+                        ZIP Code
                       </label>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           className="sr-only peer"
-                          checked={basicFields.yearsExperience.required}
-                          onChange={() =>
-                            toggleField("yearsExperience", "required")
-                          }
+                          checked={basicFields.zipCode.enabled}
+                          onChange={() => toggleField("zipCode")}
                         />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                       </label>
                     </div>
-                    <div className="relative">
-                      <ClockIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    {basicFields.zipCode.enabled && (
                       <input
-                        type="number"
-                        required={basicFields.yearsExperience.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        type="text"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                       />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Education Level{" "}
-                        {basicFields.educationLevel.required && (
-                          <span className="text-red-500">*</span>
-                        )}
-                      </label>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={basicFields.educationLevel.required}
-                          onChange={() =>
-                            toggleField("educationLevel", "required")
-                          }
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
-                      </label>
-                    </div>
-                    <div className="relative">
-                      <GraduationCapIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <select
-                        required={basicFields.educationLevel.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      >
-                        <option value="">Select Education Level</option>
-                        <option value="high_school">High School</option>
-                        <option value="associates">Associate's Degree</option>
-                        <option value="bachelors">Bachelor's Degree</option>
-                        <option value="masters">Master's Degree</option>
-                        <option value="doctorate">Doctorate</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Availability Start Date{" "}
-                        {basicFields.startDate.required && (
-                          <span className="text-red-500">*</span>
-                        )}
-                      </label>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={basicFields.startDate.required}
-                          onChange={() => toggleField("startDate", "required")}
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
-                      </label>
-                    </div>
-                    <div className="relative">
-                      <CalendarIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="date"
-                        required={basicFields.startDate.required}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -698,14 +523,12 @@ const CreateApplication = () => {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={documents.resume.required}
+                  checked={documents.resume.enabled}
                   onChange={() => handleDocumentRequirementToggle("resume")}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
-                <span className="ml-2 text-sm font-medium text-gray-700">
-                  Required
-                </span>
+                
               </label>
             </div>
 
@@ -724,16 +547,14 @@ const CreateApplication = () => {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={documents.coverLetter.required}
+                  checked={documents.coverLetter.enabled}
                   onChange={() =>
                     handleDocumentRequirementToggle("coverLetter")
                   }
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
-                <span className="ml-2 text-sm font-medium text-gray-700">
-                  Required
-                </span>
+                
               </label>
             </div>
           </div>
@@ -770,6 +591,12 @@ const CreateApplication = () => {
                         question: e.target.value,
                       })
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddQuestion();
+                      }
+                    }}
                     placeholder="Enter your question..."
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
@@ -795,29 +622,6 @@ const CreateApplication = () => {
                       <span className="text-sm font-medium">{q.question}</span>
                     </div>
                     <div className="flex items-center space-x-4">
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={q.required}
-                          onChange={() =>
-                            setQuestions(
-                              questions.map((question) =>
-                                question.id === q.id
-                                  ? {
-                                      ...question,
-                                      required: !question.required,
-                                    }
-                                  : question
-                              )
-                            )
-                          }
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
-                        <span className="ml-2 text-sm font-medium text-gray-700">
-                          Required
-                        </span>
-                      </label>
                       <button
                         onClick={() => handleRemoveQuestion(q.id)}
                         className="text-red-500 hover:text-red-700"
@@ -894,6 +698,7 @@ const CreateApplication = () => {
         </div>
 
         <div className="flex items-center justify-end space-x-4 pt-6">
+         
           <button
             type="button"
             onClick={() => setShowPreview(true)}
@@ -901,6 +706,13 @@ const CreateApplication = () => {
           >
             <EyeIcon className="w-5 h-5 mr-2" />
             Preview
+          </button>
+           <button
+            type="button"
+            onClick={() => navigate("/EmployerDashboard")}
+            className="inline-flex bg-gray-100 items-center px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors duration-200 mx-2"
+          >
+            Cancel
           </button>
           <button
             type="submit"

@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: jobboard-api
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: jobboard-db
+          property: database
+      - key: DATABASE_USER
+        fromDatabase:
+          name: jobboard-db  
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: jobboard-db
+          property: password
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: jobboard-db
+          property: host
+      - key: DATABASE_PORT
+        value: 5432
+      # Add other env vars as needed
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY  
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false

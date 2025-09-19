@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   PlusIcon,
   BuildingIcon,
   BriefcaseIcon,
   MapPinIcon,
   DollarSignIcon,
-  GraduationCapIcon,
   FileTextIcon,
-  ListChecksIcon,
   TagIcon,
   SaveIcon,
   XIcon,
@@ -17,24 +15,24 @@ import {
   CheckCircleIcon,
 } from "lucide-react";
 import { industries } from "components/Industries";
-import { suggestedSkills } from "components/SuggestedSkills";
-import { suggestedTags } from "components/SuggestedTags";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "axiosInstance";
 import { useSelector } from "react-redux";
 import { RootState } from "redux/store";
+import UploadImageModal from "../../components/UploadImageModal";
 
 const CreateJob = () => {
   const employer = useSelector(
     (state: RootState) => state.employerAuth.employer
   );
-  const [currentStep, setCurrentStep] = useState(1);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState<string>("");
   const [requirements, setRequirements] = useState<string[]>([]);
   const [newRequirement, setNewRequirement] = useState("");
   const navigate = useNavigate();
+  const [jobImage, setJobImage] = useState<File | null>(null);
+  const [jobImagePreview, setJobImagePreview] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [jobData, setJobData] = useState({
     title: "",
     type: "",
@@ -48,13 +46,47 @@ const CreateJob = () => {
     minWage: "",
     maxWage: "",
     description: "",
+    compensation: "",
+    payRate: "",
+    payFrequency: "",
   });
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
+    
+    // Validation functions
+    const validateNumeric = (val: string) => /^\d*$/.test(val);
+    const validateDecimalNumber = (val: string) => /^\d*\.?\d*$/.test(val);
+    const validateLettersAndSpaces = (val: string) => /^[a-zA-Z\s]*$/.test(val);
+    const validateLettersOnly = (val: string) => /^[a-zA-Z]*$/.test(val);
+    
+    // Apply validation based on field name
+    let validatedValue = value;
+    
+    switch (name) {
+      case 'zipCode':
+        if (!validateNumeric(value)) return; // Don't update if invalid
+        validatedValue = value;
+        break;
+      case 'payRate':
+        if (!validateDecimalNumber(value)) return; // Don't update if invalid
+        validatedValue = value;
+        break;
+      case 'city':
+        if (!validateLettersAndSpaces(value)) return; // Don't update if invalid
+        validatedValue = value;
+        break;
+      case 'state':
+        if (!validateLettersOnly(value)) return; // Don't update if invalid
+        validatedValue = value.toUpperCase(); // Convert to uppercase for state
+        break;
+      default:
+        validatedValue = value;
+    }
+    
     setJobData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: validatedValue,
     }));
   };
 
@@ -63,48 +95,63 @@ const CreateJob = () => {
 
     const fullJobData = {
       ...jobData,
+      payRate: parseFloat(jobData.payRate) || 0, // Convert to number
       skills,
       tags,
       requirements,
       employerId: employer.id,
-      companyName: employer.companyName,
+      company: employer.companyName, // Map companyName to company for backward compatibility
+      companyName: employer.companyName, // Use the new field
       logo: employer.logo,
+      jobImage: jobImage,
+      status: "Active", // Set default status as active
+      location: jobData.city, // Map city to location for jobModel
+      benefits: [], // Initialize as empty array, can be expanded later
+      schedule: jobData.type, // Use job type as schedule for now
+      applyWebsite: "", // Initialize as empty, can be expanded later
+      startDate: "", // Initialize as empty, can be expanded later
     };
 
     axiosInstance
-      .post("/employerjob/createjob", fullJobData)
+      .post("/employerjobs/createjob", fullJobData)
       .then((response) => {
-        setShowSuccess(true);
-        setTimeout(() => {
-          navigate("/employer/jobsuccess", {
-            state: {
-              jobId: response.data.newJob.id,
-              title: jobData.title,
-              location: jobData.city,
-              type: jobData.type,
-            },
-          });
-        }, 2000);
+        // Save job to employer_data jobs array in localStorage after successful response
+        const createdJob = {
+          id: response.data.newJob.id,
+          title: jobData.title,
+          location: jobData.city,
+          type: jobData.type,
+          company: employer.companyName, // Keep for backward compatibility
+          companyName: employer.companyName, // Use new field
+          status: "Active",
+          createdAt: new Date().toISOString(),
+          ...fullJobData
+        };
+        
+        // Get existing employer_data from localStorage
+        const employerData = JSON.parse(localStorage.getItem('employer_data') || '{}');
+        
+        // Initialize jobs array if it doesn't exist
+        if (!employerData.jobs) {
+          employerData.jobs = [];
+        }
+        
+        // Add new job to the jobs array
+        employerData.jobs.unshift(createdJob);
+        
+        // Save updated employer_data back to localStorage
+        localStorage.setItem('employer_data', JSON.stringify(employerData));
+        
+        navigate("/employer/jobsuccess", {
+          state: {
+            jobId: response.data.newJob.id,
+            title: jobData.title,
+            location: jobData.city,
+            type: jobData.type,
+          },
+        });
       })
       .catch((error) => console.error(error));
-  };
-
-  const handleAddSkill = (e: any) => {
-    e.preventDefault();
-    if (newSkill.trim()) {
-      setSkills([...skills, newSkill.trim()]);
-      setNewSkill("");
-    }
-  };
-
-  const removeSkill = (skillToRemove: any) => {
-    setSkills(skills.filter((skill) => skill !== skillToRemove));
-  };
-
-  const addSuggestedSkill = (skill: any) => {
-    if (!skills.includes(skill)) {
-      setSkills([...skills, skill]);
-    }
   };
 
   const [tags, setTags] = useState<string[]>([]);
@@ -139,8 +186,23 @@ const CreateJob = () => {
     setRequirements(requirements.filter((req) => req !== requirementToRemove));
   };
 
+  const handleJobImageSave = (file: File) => {
+    setJobImage(file);
+    const previewUrl = URL.createObjectURL(file);
+    setJobImagePreview(previewUrl);
+  };
+
+  // Cleanup function for job image preview URL
+  useEffect(() => {
+    return () => {
+      if (jobImagePreview) {
+        URL.revokeObjectURL(jobImagePreview);
+      }
+    };
+  }, [jobImagePreview]);
+
   return (
-    <div className="max-w-4xl mx-auto mt-16">
+    <div className="max-w-4xl mx-auto mt-10">
       <div className="flex items-center ml-5 justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Create New Job</h1>
         <p className="text-sm text-gray-500">* Required fields</p>
@@ -164,7 +226,7 @@ const CreateJob = () => {
                 onChange={handleInputChange}
                 required
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                placeholder="e.g. Senior Frontend Developer"
+                placeholder="e.g. Content Creator"
               />
             </div>
           </div>
@@ -183,10 +245,10 @@ const CreateJob = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 <option value="">Select Job Type</option>
-                <option value="Full-time">Full-time</option>
                 <option value="Part-time">Part-time</option>
                 <option value="Contract">Contract</option>
                 <option value="Internship">Internship</option>
+                <option value="Full-time">Full-time</option>
               </select>
             </div>
           </div>
@@ -200,7 +262,7 @@ const CreateJob = () => {
             <HomeIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              name="streetAddress"
+              name="address"
               value={jobData.address}
               onChange={handleInputChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -241,6 +303,7 @@ const CreateJob = () => {
                   value={jobData.state}
                   onChange={handleInputChange}
                   required
+                  maxLength={2}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="e.g. NY"
                 />
@@ -257,6 +320,7 @@ const CreateJob = () => {
                   name="zipCode"
                   value={jobData.zipCode}
                   onChange={handleInputChange}
+                  maxLength={5}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="e.g. 10001"
                 />
@@ -266,28 +330,7 @@ const CreateJob = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Experience Level
-            </label>
-            <div className="relative">
-              <GraduationCapIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <select
-                name="experienceLevel"
-                value={jobData.experienceLevel}
-                onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="">Select Years</option>
-                <option value="No Experience">No Experience</option>
-                <option value="1 Year">1 Year</option>
-                <option value="2 Year">2 Years</option>
-                <option value="Over 3 Years">Over 3 Years</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Industry
+              Industry <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <BuildingIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -298,7 +341,7 @@ const CreateJob = () => {
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
-                <option value="">Select Industry</option>
+                <option value="">Select Industry </option>
                 {industries.map((industry) => (
                   <option key={industry} value={industry}>
                     {industry}
@@ -309,34 +352,44 @@ const CreateJob = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Hourly Wage Range <span className="text-red-500">*</span>
-          </label>
-          <div className="flex items-center space-x-4">
-            <div className="relative flex-1">
+        <div className="flex space-x-4">
+          <div className="w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Pay Rate <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
               <DollarSignIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
-                type="number"
-                name="minWage"
-                value={jobData.minWage}
+                type="text"
+                name="payRate"
+                value={jobData.payRate}
                 onChange={handleInputChange}
-                required
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                placeholder="Min/hour"
+                placeholder="e.g. 15.50"
               />
             </div>
-            <div className="relative flex-1">
-              <DollarSignIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="number"
-                name="maxWage"
-                value={jobData.maxWage}
+          </div>
+
+          <div className="w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Pay Frequency <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <CheckCircleIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <select
+                name="payFrequency"
+                value={jobData.payFrequency}
                 onChange={handleInputChange}
-                required
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                placeholder="Max/hour"
-              />
+              >
+                <option value="">Select Frequency </option>
+                <option value="One Time">Once</option>
+                <option value="Gift Card">Gift Card</option>
+                <option value="Per Hour">Per Hour</option>
+                <option value="Per Day">Per Day</option>
+                <option value="Per Week">Per Week</option>
+                <option value="Per Month">Per Month</option>
+              </select>
             </div>
           </div>
         </div>
@@ -410,6 +463,12 @@ const CreateJob = () => {
                   type="text"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddTag(e);
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="Add a category or tag..."
                 />
@@ -439,7 +498,7 @@ const CreateJob = () => {
             </div>
           </div>
 
-          <div className="mt-6 space-y-4">
+         {/*} <div className="mt-6 space-y-4">
             <p className="text-sm font-medium text-gray-700">Suggested Tags</p>
             {Object.entries(suggestedTags).map(([category, categoryTags]) => (
               <div key={category} className="space-y-2">
@@ -465,6 +524,53 @@ const CreateJob = () => {
                 </div>
               </div>
             ))}
+          </div>*/}
+        </div>
+
+        {/* Job Image Upload Section */}
+        <div className="border-t pt-6">
+          <label className="block text-sm font-medium text-gray-700 mb-4">
+            Job Image <span className="text-red-500">*</span>
+          </label>
+          <div className="flex items-start space-x-4">
+            {jobImagePreview ? (
+              <div className="relative">
+                <img
+                  src={jobImagePreview}
+                  alt="Job preview"
+                  className="w-64 h-48 object-cover rounded-lg border-2 border-gray-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setJobImage(null);
+                    setJobImagePreview(null);
+                    if (jobImagePreview) {
+                      URL.revokeObjectURL(jobImagePreview);
+                    }
+                  }}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                >
+                  <XIcon className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <div className="w-64 h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                <FileTextIcon className="w-8 h-8 text-gray-400" />
+              </div>
+            )}
+            <div className="flex-1">
+              <button
+                type="button"
+                onClick={() => setIsImageModalOpen(true)}
+                className="px-4 py-2 bg-teal-50 text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
+              >
+                {jobImage ? 'Change Image' : 'Upload Image'}
+              </button>
+              <p className="text-sm text-gray-500 mt-1">
+                Upload an image to represent the job listing
+              </p>
+            </div>
           </div>
         </div>
 
@@ -481,10 +587,18 @@ const CreateJob = () => {
             className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors duration-200"
           >
             <SaveIcon className="w-5 h-5 mr-2" />
-            Save Job
+            Create Job
           </button>
         </div>
       </form>
+
+      {/* Job Image Upload Modal */}
+      <UploadImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onSave={handleJobImageSave}
+        title="Upload Job Image"
+      />
     </div>
   );
 };

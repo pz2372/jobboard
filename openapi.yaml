@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: Jobs Board API
+  version: 1.0.0
+  description: Jobs Board API Specification
+
+servers:
+  - url: https://your-render-app.onrender.com
+    description: Production server
+  - url: http://localhost:4000
+    description: Local development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /user/signup:
+    post:
+      summary: User signup
+      security: []  # No auth required for signup
+      responses:
+        '200':
+          description: Successful signup
+
+  /user/login:
+    post:
+      summary: User login
+      security: []  # No auth required for login
+      responses:
+        '200':
+          description: Successful login
+
+  /employer/signup:
+    post:
+      summary: Employer signup
+      security: []  # No auth required for signup
+      responses:
+        '200':
+          description: Successful signup
+
+  /employer/login:
+    post:
+      summary: Employer login
+      security: []  # No auth required for login
+      responses:
+        '200':
+          description: Successful login
+
+  /jobs/jobs:
+    get:
+      summary: Get all jobs
+      security: []  # Public endpoint
+      responses:
+        '200':
+          description: List of jobs
+
+  /jobs/searchjobs:
+    get:
+      summary: Search jobs
+      security: []  # Public endpoint
+      responses:
+        '200':
+          description: Search results
+
+  /jobs/recommendation:
+    get:
+      summary: Get job recommendations
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Job recommendations
+
+  /employerjobs/createjob:
+    post:
+      summary: Create a new job
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Job created
+
+  /applications/addUserApplication:
+    post:
+      summary: Submit job application
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Application submitted 

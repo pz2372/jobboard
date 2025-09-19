@@ -14,7 +14,10 @@ router.get('/employerAppliedApplications/:employerId', employerApplicationContro
 router.delete('/:userId', employerApplicationController.deleteAppliedJob);
 
 // Route to update an applied job (status, applicationId, etc.)
-router.put('/:jobId', employerApplicationController.updateAppliedJob);
+router.put('/:id', employerApplicationController.updateAppliedJob);
+
+// Route to accept an application (specific route for accepting)
+router.put('/accept/:id', employerApplicationController.acceptApplication);
 
 
 module.exports = router;

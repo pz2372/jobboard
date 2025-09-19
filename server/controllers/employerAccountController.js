@@ -1,9 +1,8 @@
 const { EmployerAccount } = require("../models");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const path = require('path');
-const s3Client = require('../config/awsConfig');
-const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const { uploadCompanyLogo } = require('../utils/cloudinaryHelper');
 
 // Employer create account
 exports.createEmployerAccount = async (req, res) => {
@@ -45,9 +44,18 @@ exports.createEmployerAccount = async (req, res) => {
       description,
     });
 
-    const employerToken = jwt.sign({ id: newEmployer.id }, "yourSecretKey", {
-      expiresIn: "1h",
+    const employerToken = jwt.sign({ id: newEmployer.id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
     });
+
+    // Set httpOnly cookie
+    res.cookie("authToken", employerToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(201).json({
       message: "Employer account created successfully.",
       employer: {
@@ -61,12 +69,28 @@ exports.createEmployerAccount = async (req, res) => {
         EIN: newEmployer.EIN,
         website: newEmployer.website,
         logo: newEmployer.logo,
-      },
-      employerToken
+      }
+      // Remove employerToken from response
     });
   } catch (error) {
     console.error("Error creating employer account:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+// Employer logout
+exports.logoutEmployerAccount = async (req, res) => {
+  try {
+    // Clear the authentication cookie
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -89,13 +113,19 @@ exports.loginEmployerAccount = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.cookie("token", employerToken, {
+    // Set httpOnly cookie
+    res.cookie("authToken", employerToken, {
       httpOnly: true,
-      secure: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.status(200).json({ message: "Login successful", employerToken, employer });
+    res.status(200).json({ 
+      message: "Login successful", 
+      employer 
+      // Remove employerToken from response
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -134,20 +164,8 @@ exports.updateLogo = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const file = req.file;
-    const fileExtension = path.extname(file.originalname);
-    const fileName = `employers/${id}/${Date.now()}${fileExtension}`;
-
-    // Upload to S3
-    const params = {
-      Bucket: 'shiftlink',
-      Key: fileName,
-      Body: file.buffer,
-      ContentType: file.mimetype
-    };
-
-    await s3Client.send(new PutObjectCommand(params));
-    logo = `https://shiftlink.s3.us-east-1.amazonaws.com/${fileName}`;
+    // Upload to Cloudinary using helper function
+    const uploadResult = await uploadCompanyLogo(req.file.buffer, id);
 
     // Save file URL to database
     const employer = await EmployerAccount.findOne({ where: { id: id } });
@@ -156,7 +174,7 @@ exports.updateLogo = async (req, res) => {
       return res.status(404).json({ message: 'Employer not found' });
     }
 
-    await employer.update({ logo });
+    await employer.update({ logo: uploadResult.url });
 
     res.status(200).json({ message: 'Logo updated successfully', employer });
   } catch (error) {
@@ -194,6 +212,22 @@ exports.getEmployerId = async (req, res) => {
     }
 
     res.status(200).json(employer.id);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get current authenticated employer
+exports.getCurrentEmployer = async (req, res) => {
+  try {
+    const employerId = req.user.id; // Changed from req.employerId to req.user.id
+    
+    const employer = await EmployerAccount.findOne({ where: { id: employerId } });
+    if (!employer) {
+      return res.status(404).json({ message: "Employer not found" });
+    }
+
+    res.status(200).json({ employer });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

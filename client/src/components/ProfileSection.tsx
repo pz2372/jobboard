@@ -1,31 +1,20 @@
-import React, { useState, ReactNode } from "react";
+import React, { useState, ReactNode, useEffect } from "react";
 import {
   PlusIcon,
-  GraduationCapIcon,
-  TrophyIcon,
-  HeartIcon,
-  BriefcaseIcon,
-  UsersIcon,
-  StarIcon,
-  UserCircle,
-  Briefcase,
-  MapPin,
-  Upload,
-  BookOpenIcon,
-  SmileIcon,
-  AwardIcon,
-  Settings,
-  X,
   PencilIcon,
   CheckIcon,
 } from "lucide-react";
 import SuggestionBubble from "./SuggestionBubble";
 import SelectedItem from "./SelectedItem";
-import suggestions from "./Suggestions";
-import axiosInstance from "axiosInstance";
+import suggestions from "./ProfileSuggestions";
 
 type InputValues = {
   [key in SuggestionSection]?: string;
+};
+
+type WorkExperienceInputs = {
+  position: string;
+  business: string;
 };
 
 type SuggestionSection =
@@ -37,8 +26,6 @@ type SuggestionSection =
   | "awards"
   | "volunteer"
   | "bio";
-
-type SelectedItems = Record<string, any[]>;
 
 interface ProfileSectionProps {
   title: string;
@@ -61,11 +48,16 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
   section,
   placeholder,
   selectedItems,
+  bio: bioProp,
   onChange,
   onSave,
 }) => {
-  const [bio, setBio] = useState("");
+  const [bio, setBio] = useState(bioProp || "");
   const [inputValues, setInputValues] = useState<InputValues>({});
+  const [workInputs, setWorkInputs] = useState<WorkExperienceInputs>({
+    position: "",
+    business: "",
+  });
   const [editModes, setEditModes] = useState<
     Record<SuggestionSection, boolean>
   >({
@@ -78,6 +70,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
     awards: false,
     volunteer: false,
   });
+
+  // Update bio when the prop changes (from Redux store)
+  useEffect(() => {
+    if (bioProp !== undefined) {
+      setBio(bioProp);
+    }
+  }, [bioProp]);
 
   // Ensure `selectedItems` is always an array
   const selectedItemsSafe = Array.isArray(selectedItems) ? selectedItems : [];
@@ -106,6 +105,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
     }
   };
 
+  const handleWorkKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleWorkAdd();
+    }
+  };
+
   const handleAdd = (section: SuggestionSection, value?: string) => {
     const itemToAdd = value ?? inputValues[section];
 
@@ -121,6 +127,21 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
       ...prev,
       [section]: "",
     }));
+  };
+
+  const handleWorkAdd = () => {
+    if (!workInputs.position.trim() || !workInputs.business.trim()) return;
+
+    const combinedEntry = `${workInputs.position} - ${workInputs.business}`;
+    
+    if (Array.isArray(selectedItems)) {
+      onChange("add", "work", combinedEntry);
+    }
+
+    setWorkInputs({
+      position: "",
+      business: "",
+    });
   };
 
   return (
@@ -162,7 +183,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
           <textarea
             placeholder={placeholder}
             value={bio || ""}
-            onChange={(e) => {setBio(e.target.value); onChange("bio", "bio", bio)}}
+            onChange={(e) => {
+              setBio(e.target.value); 
+              onChange("bio", "bio", e.target.value);
+            }}
             disabled={!editModes.bio}
             className={`w-full px-4 py-3 rounded-xl bg-white text-sm text-teal-600 placeholder-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 transition-colors min-h-[120px] resize-none ${
               editModes.bio
@@ -173,25 +197,64 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
         ) : (
           editModes[section] && (
             <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                placeholder={placeholder}
-                value={inputValues[section] || ""}
-                className="flex-1 px-4 py-2 rounded-full bg-white text-sm text-teal-600 border border-teal-200 placeholder-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 hover:border-teal-300 transition-colors"
-                onChange={(e) =>
-                  setInputValues({
-                    ...inputValues,
-                    [section]: e.target.value,
-                  })
-                }
-                onKeyDown={(e) => handleKeyDown(e, section)}
-              />
-              <button
-                onClick={() => handleAdd(section)}
-                className="p-2 rounded-full bg-white text-teal-600 hover:bg-teal-50 border border-teal-200 transition-colors"
-              >
-                <PlusIcon className="w-4 h-4" />
-              </button>
+              {section === "work" ? (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Position name"
+                    value={workInputs.position}
+                    className="flex-1 px-4 py-2 rounded-full bg-white text-sm text-teal-600 border border-teal-200 placeholder-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 hover:border-teal-300 transition-colors"
+                    onChange={(e) =>
+                      setWorkInputs({
+                        ...workInputs,
+                        position: e.target.value,
+                      })
+                    }
+                    onKeyDown={handleWorkKeyDown}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Business name"
+                    value={workInputs.business}
+                    className="flex-1 px-4 py-2 rounded-full bg-white text-sm text-teal-600 border border-teal-200 placeholder-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 hover:border-teal-300 transition-colors"
+                    onChange={(e) =>
+                      setWorkInputs({
+                        ...workInputs,
+                        business: e.target.value,
+                      })
+                    }
+                    onKeyDown={handleWorkKeyDown}
+                  />
+                  <button
+                    onClick={handleWorkAdd}
+                    className="p-2 rounded-full bg-white text-teal-600 hover:bg-teal-50 border border-teal-200 transition-colors"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    placeholder={placeholder}
+                    value={inputValues[section] || ""}
+                    className="flex-1 px-4 py-2 rounded-full bg-white text-sm text-teal-600 border border-teal-200 placeholder-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300 hover:border-teal-300 transition-colors"
+                    onChange={(e) =>
+                      setInputValues({
+                        ...inputValues,
+                        [section]: e.target.value,
+                      })
+                    }
+                    onKeyDown={(e) => handleKeyDown(e, section)}
+                  />
+                  <button
+                    onClick={() => handleAdd(section)}
+                    className="p-2 rounded-full bg-white text-teal-600 hover:bg-teal-50 border border-teal-200 transition-colors"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                  </button>
+                </>
+              )}
             </div>
           )
         )}

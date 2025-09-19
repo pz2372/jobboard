@@ -11,7 +11,7 @@ module.exports = (sequelize) => {
       },
       applicationId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "applications", 
           key: "id",
@@ -51,7 +51,7 @@ module.exports = (sequelize) => {
       },
       status: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       resume: {
         type: DataTypes.STRING,
@@ -63,11 +63,15 @@ module.exports = (sequelize) => {
       },
       basicFieldAnswers: {
         type: DataTypes.JSONB, 
-        allowNull: false,
+        allowNull: true,
       },
       questionAnswers: {
         type: DataTypes.JSONB, 
-        allowNull: false,
+        allowNull: true,
+      },
+      acceptedDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
     },
     {

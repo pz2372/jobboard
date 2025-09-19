@@ -1,25 +1,31 @@
-import { useState } from 'react'
-import './App.css'
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AppDispatch } from "./redux/store";
+import { checkEmployerAuth } from "./redux/employerAuthSlice";
+import employerLocalStorageService from "./services/employerLocalStorageService";
+
+import './App.css'
 import NavBar from './components/NavBar';
+import EmployerDataDebugPanel from './components/EmployerDataDebugPanel';
 import ProtectedRoute from 'components/ProtectedRoute';
 import RedirectIfLoggedIn from "./components/RedirectedIfLoggedIn"
 
 import HomePage from './pages/HomePage';
-import JobPage from './pages/JobPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import TermsPage from './pages/TermsPage';
-import CompanyPage from "./pages/CompanyPage"
+import JobPage from './pages/user/JobPage';
+import LoginPage from './pages/user/account/LoginPage';
+import SignupPage from './pages/user/account/SignupPage';
+import ForgotPasswordPage from './pages/user/account/ForgotPasswordPage';
+import TermsPage from './pages/resources/TermsPage';
+import CompanyPage from "./pages/user/CompanyPage"
 import ComingSoon from 'pages/ComingSoon';
 import FourZeroFour from 'pages/404';
 
-import ProfilePage from './pages/ProfilePage';
-import HistoryPage from './pages/HistoryPage';
-import CompleteProfilePage from './pages/CompleteProfilePage';
-import ApplicationPage from './pages/ApplicationPage';
-import ApplicationSuccessPage from 'pages/ApplicationSuccessPage';
+import ProfilePage from './pages/user/ProfilePage';
+import HistoryPage from './pages/user/HistoryPage';
+import CompleteProfilePage from './pages/user/account/CompleteProfilePage';
+import ApplicationPage from './pages/user/ApplicationPage';
+import ApplicationSuccessPage from 'pages/user/ApplicationSuccessPage';
 
 import CreateJob from './pages/employer/CreateJob';
 import JobSuccess from './pages/employer/JobSuccess';
@@ -29,8 +35,26 @@ import EmployerDashboard from './pages/employer/EmployerDashboard';
 import EmployerProfile from 'pages/employer/EmployerProfile';
 import EmployerSignup from './pages/employer/EmployerSignup';
 import EmployerLogin from './pages/employer/EmployerLogin';
+import ApplicantProfilePage from 'pages/employer/ApplicantProfilePage';
+import AllApplicationsPage from 'pages/employer/AllApplicationsPage';
+import SubscriptionPage from 'pages/employer/SubscriptionPage';
 
 const App = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    // Check for existing authentication on app load via httpOnly cookies
+    // Note: localStorage no longer contains employer data for security reasons
+    console.log("App.tsx: Checking employer authentication on app load...");
+    dispatch(checkEmployerAuth())
+      .unwrap()
+      .then((result) => {
+        console.log("App.tsx: Authentication check successful:", result);
+      })
+      .catch((error) => {
+        console.log("App.tsx: Authentication check failed:", error);
+      });
+  }, [dispatch]);
 
   return (
     <Router>
@@ -54,7 +78,7 @@ const App = () => {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/completeprofile" element={<CompleteProfilePage />} />
-              <Route path="/jobapplication/:jobId" element={<ApplicationPage />} />
+              <Route path="/jobapplication" element={<ApplicationPage />} />
               <Route path="/applicationsuccess" element={<ApplicationSuccessPage/>} />
               {/*<Route path="/application" element={<Application />} />*/}
             </Route>
@@ -62,11 +86,15 @@ const App = () => {
             {/* Employer Routes */}
             {/*<Route element={<EmployerRoute />}>*/}
               <Route path="/employer" element={<EmployerDashboard />} />
+              <Route path="/employer/dashboard" element={<EmployerDashboard />} />
+              <Route path="/employer/applications" element={<AllApplicationsPage />} />
               <Route path="/employer/createjob" element={<CreateJob />} />
+              <Route path="/user/profile/:userId" element={<ApplicantProfilePage />} />
               <Route path="/employer/jobsuccess" element={<JobSuccess />} />
               <Route path="/employer/createapplication/:jobId" element={<CreateApplication />} />
               <Route path="/employer/applicationsuccess" element={<ApplicationSuccess />} />
               <Route path="/employer/profile" element={<EmployerProfile />} />
+              <Route path="/employer/subscription" element={<SubscriptionPage />} />
             {/*</Route>*/}
 
              {/* Employer Public Routes */}
@@ -75,6 +103,9 @@ const App = () => {
             {/*<Route path="/employer/forgotpassword" element={<EmployerForgotPassword />} />*/}
           </Routes>
         </main>
+
+        {/* Debug Panel for Development */}
+        <EmployerDataDebugPanel />
       </div>
     </Router>
   );

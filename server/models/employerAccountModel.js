@@ -61,9 +61,6 @@ module.exports = (sequelize) => {
       website: {
         type: DataTypes.STRING,
         allowNull: true,
-        validate: {
-          isUrl: true,
-        },
       },
     },
     {
@@ -77,6 +74,11 @@ module.exports = (sequelize) => {
     EmployerAccount.hasMany(models.Job, {
       foreignKey: "employerId",
       as: "jobs",
+    });
+    
+    EmployerAccount.hasOne(models.EmployerSubscription, {
+      foreignKey: "employerId",
+      as: "subscription",
     });
   };
 

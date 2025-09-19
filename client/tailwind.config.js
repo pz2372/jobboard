@@ -5,7 +5,11 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}", // Include all JSX and TSX files in your src folder
   ],
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        'under-nav-margin': "20px",
+      }
+    },
   },
   plugins: [],
 }

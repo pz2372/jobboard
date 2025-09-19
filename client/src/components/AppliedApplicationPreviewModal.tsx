@@ -4,11 +4,12 @@ import React from "react";
 type PreviewModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  basicFields: Record<string, { enabled: boolean; required: boolean }>;
+  basicFields: Record<string, boolean >;
   documents: Documents;
   questions: Question[];
   basicFieldAnswers: [];
   questionAnswers: [];
+  applicantName?: string; // Add applicant name prop
 };
 
 type Document = {
@@ -37,15 +38,25 @@ const AppliedApplicationPreviewModal: React.FC<PreviewModalProps> = ({
   questions,
   basicFieldAnswers,
   questionAnswers,
+  applicantName,
 }) => {
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky  top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-900">
-            Application Preview
+            {applicantName ? `${applicantName}'s Application Preview` : 'Application Preview'}
           </h2>
           <button
             onClick={onClose}
@@ -67,13 +78,10 @@ const AppliedApplicationPreviewModal: React.FC<PreviewModalProps> = ({
                       {key
                         .replace(/([A-Z])/g, " $1")
                         .replace(/^./, (str) => str.toUpperCase())}
-                      {field.required && (
-                        <span className="text-red-500">*</span>
-                      )}
                     </label>
                     <input
                       disabled
-                      value={basicFieldAnswers[key]}
+                      value={basicFieldAnswers?.[key] || ""}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                       placeholder={`Enter your ${key}`}
                     />
@@ -117,68 +125,72 @@ const AppliedApplicationPreviewModal: React.FC<PreviewModalProps> = ({
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Questions</h3>
             <div className="space-y-4">
-              {questions.map((q) => (
-                <div key={q.id} className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {q.question}{" "}
-                    {q.required && <span className="text-red-500">*</span>}
-                  </label>
-                  {q.type === "text" && (
-                    <textarea
-                      disabled
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                      rows={3}
-                      value={questionAnswers[q.id]}
-                      placeholder="Enter your answer"
-                    />
-                  )}
-                  {q.type === "multiple" && (
-                    <div className="space-y-2">
-                      {q.options.map((option, index) => (
-                        <div key={index} className="flex items-center">
+              {questions && questions.length > 0 ? (
+                questions.map((q) => (
+                  <div key={q.id} className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {q.question}{" "}
+                      {q.required && <span className="text-red-500">*</span>}
+                    </label>
+                    {q.type === "text" && (
+                      <textarea
+                        disabled
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                        rows={3}
+                        value={questionAnswers?.[q.id] || ""}
+                        placeholder="Enter your answer"
+                      />
+                    )}
+                    {q.type === "multiple" && (
+                      <div className="space-y-2">
+                        {q.options?.map((option, index) => (
+                          <div key={index} className="flex items-center">
+                            <input
+                              type="radio"
+                              disabled
+                              name={`question-${q.id}`}
+                              value={option}
+                              checked={questionAnswers?.[q.id] === option}
+                              className="h-4 w-4 text-teal-600 border-gray-300"
+                            />
+                            <label className="ml-2 text-sm text-gray-700">
+                              {option}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {q.type === "yesno" && (
+                      <div className="space-x-4">
+                        <label className="inline-flex items-center">
                           <input
                             type="radio"
                             disabled
                             name={`question-${q.id}`}
-                            value={option}
-                            checked={questionAnswers?.[q.id] === option}
+                            value="Yes"
+                            checked={questionAnswers?.[q.id] === "Yes"}
                             className="h-4 w-4 text-teal-600 border-gray-300"
                           />
-                          <label className="ml-2 text-sm text-gray-700">
-                            {option}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {q.type === "yesno" && (
-                    <div className="space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          disabled
-                          name={`question-${q.id}`}
-                          value="Yes"
-                          checked={questionAnswers?.[q.id] === "Yes"}
-                          className="h-4 w-4 text-teal-600 border-gray-300"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Yes</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          disabled
-                          name={`question-${q.id}`}
-                          value="No"
-                          checked={questionAnswers?.[q.id] === "No"}
-                          className="h-4 w-4 text-teal-600 border-gray-300"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">No</span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              ))}
+                          <span className="ml-2 text-sm text-gray-700">Yes</span>
+                        </label>
+                        <label className="inline-flex items-center">
+                          <input
+                            type="radio"
+                            disabled
+                            name={`question-${q.id}`}
+                            value="No"
+                            checked={questionAnswers?.[q.id] === "No"}
+                            className="h-4 w-4 text-teal-600 border-gray-300"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">No</span>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No questions for this application.</p>
+              )}
             </div>
           </div>
         </div>

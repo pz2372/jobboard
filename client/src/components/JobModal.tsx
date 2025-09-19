@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
+const JobModal = ({ job, onClose, showApplyButton = true }: { job: any; onClose: () => void; showApplyButton?: boolean }) => {
   const navigate = useNavigate();
 
   const parsedRequirements: string[] =
@@ -22,8 +22,14 @@ const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
     : [];
 
   return (
-    <div className="fixed z-20 inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed z-20 inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-start">
             <div>
@@ -33,7 +39,7 @@ const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
               <div className="flex items-center gap-2 text-gray-600">
                 <Building2 className="w-4 h-4" />
                 <Link to={`/company/${job.employerId}`}>
-                  <span>{job.company}</span>
+                  <span>{job.companyName || job.company}</span>
                 </Link>
               </div>
             </div>
@@ -50,21 +56,17 @@ const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2 bg-teal-50 text-teal-600 px-4 py-2 rounded-full">
               <MapPin className="w-4 h-4" />
-              <span>{job.location}</span>
+              <span>{job.city +", "+ job.state}</span>
             </div>
             <div className="flex items-center gap-2 bg-teal-50 text-teal-600 px-4 py-2 rounded-full">
               <DollarSign className="w-4 h-4" />
               <span>
-                {job.minWage}-{job.maxWage}
+                {job.payRate} / {job.payFrequency}
               </span>
             </div>
             <div className="flex items-center gap-2 bg-teal-50 text-teal-600 px-4 py-2 rounded-full">
               <Briefcase className="w-4 h-4" />
               <span>{job.type}</span>
-            </div>
-            <div className="flex items-center gap-2 bg-teal-50 text-teal-600 px-4 py-2 rounded-full">
-              <Clock className="w-4 h-4" />
-              <span>20-25 hrs/week</span>
             </div>
           </div>
 
@@ -105,15 +107,17 @@ const JobModal = ({ job, onClose }: { job: any; onClose: () => void }) => {
           </div>*/}
         </div>
 
-        <div className="p-6 border-t border-gray-200">
-          <button
-            onClick={() => navigate(`/jobapplication/${job.id}`)}
-            className="w-full bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-500 transition-all duration-300 font-medium flex items-center justify-center gap-2"
-          >
-            Apply Now
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
+        {showApplyButton && (
+          <div className="p-6 border-t border-gray-200">
+            <button
+              onClick={() => navigate(`/jobapplication/${job.id}`)}
+              className="w-full bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-500 transition-all duration-300 font-medium flex items-center justify-center gap-2"
+            >
+              Apply Now
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

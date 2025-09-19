@@ -1,30 +1,9 @@
 import {
   Share2Icon,
   LinkIcon,
-  PlusIcon,
-  UserIcon,
-  MailIcon,
-  PhoneIcon,
-  FileTextIcon,
-  ListChecksIcon,
-  XIcon,
-  SaveIcon,
   EyeIcon,
-  TrashIcon,
-  GripVerticalIcon,
-  AlertCircleIcon,
-  MapPinIcon,
-  LinkedinIcon,
-  GlobeIcon,
-  BuildingIcon,
-  ClockIcon,
-  GraduationCapIcon,
-  CalendarIcon,
-  UserCircleIcon,
   ArrowRightIcon,
   CheckIcon,
-  LayoutIcon,
-  ListIcon,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -46,7 +25,7 @@ const ApplicationSuccess = ({ formData }: any) => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-16 mb-16">
+    <div className="max-w-3xl mx-auto mt-8 mb-16">
       <PreviewModal
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}

@@ -3,7 +3,7 @@ import logo from "../images/logo.png";
 import mobileLogo from "../images/mobile_logo.png";
 import { ArrowRightToLine, BriefcaseIcon, TableOfContents, UserCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { RootState } from "redux/store";
+import { RootState, AppDispatch } from "redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { employerLogout } from "../redux/employerAuthSlice";
 
@@ -12,13 +12,13 @@ const NavBar = () => {
   const employer = useSelector(
     (state: RootState) => state.employerAuth.employer
   );
-  const dispatch = useDispatch();
-  const navigate = useNavigate()
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(employerLogout())
-    navigate("/")
-  }
+    dispatch(employerLogout());
+    navigate("/");
+  };
 
 
   return (

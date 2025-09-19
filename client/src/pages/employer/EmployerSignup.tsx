@@ -13,12 +13,14 @@ import {
   ArrowRightIcon,
   Loader2Icon,
   CheckCircleIcon,
+  Upload,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "axiosInstance";
 import { useDispatch } from "react-redux";
 import { employerSignup } from "../../redux/employerAuthSlice";
 import type { AppDispatch } from "../../redux/store";
+import UploadImageModal from "../../components/UploadImageModal";
 
 const EmployerSignup = () => {
   const [step, setStep] = useState(1);
@@ -41,21 +43,114 @@ const EmployerSignup = () => {
   });
   const [passwordError, setPasswordError] = useState("");
   const [validationError, setValidationError] = useState("");
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    capital: false,
+    symbol: false,
+  });
+  const [companyLogo, setCompanyLogo] = useState<string | null>(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+
+  const validatePassword = (password: string) => {
+    const requirements = {
+      length: password.length >= 8,
+      capital: /[A-Z]/.test(password),
+      symbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    };
+    setPasswordRequirements(requirements);
+    
+    const isValid = requirements.length && requirements.capital && requirements.symbol;
+    return isValid;
+  };
+
+  // Validation functions for different field types
+  const isLettersOnly = (value: string): boolean => {
+    return /^[a-zA-Z\s]*$/.test(value);
+  };
+
+  const formatPhoneNumber = (value: string): string => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limitedDigits = digits.slice(0, 10);
+    
+    // Format based on length
+    if (limitedDigits.length <= 3) {
+      return limitedDigits;
+    } else if (limitedDigits.length <= 6) {
+      return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3)}`;
+    } else {
+      return `(${limitedDigits.slice(0, 3)}) ${limitedDigits.slice(3, 6)}-${limitedDigits.slice(6)}`;
+    }
+  };
+
+  const handleLogoUpload = (file: File | null) => {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        setCompanyLogo(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    setUploadModalOpen(false);
+  };
+
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
+    let processedValue = value;
+
+    // Apply specific validation and formatting based on field type
+    if (name === "city" && !isLettersOnly(value)) {
+      return; // Don't update if non-letters entered
+    }
+    
+    if (name === "state") {
+      if (!isLettersOnly(value)) return; // Don't update if non-letters entered
+      processedValue = value.toUpperCase().slice(0, 2); // Auto-capitalize and limit to 2 characters
+    }
+    
+    if (name === "phone") {
+      processedValue = formatPhoneNumber(value);
+    }
+    
+    if (name === "taxNumber") {
+      // Only allow numbers and limit to 9 digits
+      const digits = value.replace(/\D/g, '');
+      processedValue = digits.slice(0, 9);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
-    if (name === "confirmPassword" || name === "password") {
-      if (name === "confirmPassword" && value !== formData.password) {
+    
+    if (name === "password") {
+      const isValidPassword = validatePassword(processedValue);
+      if (processedValue && !isValidPassword) {
+        setPasswordError("Password does not meet requirements");
+      } else {
+        setPasswordError("");
+      }
+      
+      // Check confirm password match if it exists
+      if (formData.confirmPassword && processedValue !== formData.confirmPassword) {
         setPasswordError("Passwords do not match");
-      } else if (name === "password" && value !== formData.confirmPassword) {
+      }
+    }
+    
+    if (name === "confirmPassword") {
+      if (processedValue !== formData.password) {
         setPasswordError("Passwords do not match");
+      } else if (formData.password && !validatePassword(formData.password)) {
+        setPasswordError("Password does not meet requirements");
       } else {
         setPasswordError("");
       }
     }
+    
     setValidationError("");
     setSubmissionError("");
   };
@@ -71,6 +166,10 @@ const EmployerSignup = () => {
       return false;
     }
     if (passwordError) return false;
+    if (!validatePassword(formData.password)) {
+      setValidationError("Password must meet all requirements");
+      return false;
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       setValidationError("Please enter a valid email address");
       return false;
@@ -83,13 +182,14 @@ const EmployerSignup = () => {
       !formData.address ||
       !formData.city ||
       !formData.state ||
-      !formData.phone
+      !formData.phone ||
+      !companyLogo
     ) {
-      setValidationError("Please fill in all required fields");
+      setValidationError("Please fill in all required fields and upload a company logo");
       return false;
     }
-    if (formData.phone && !/^\+?[\d\s-]{10,}$/.test(formData.phone)) {
-      setValidationError("Please enter a valid phone number");
+    if (formData.phone && !/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.phone)) {
+      setValidationError("Please enter a complete 10-digit phone number");
       return false;
     }
     if (formData.website && !/^https?:\/\/.*/.test(formData.website)) {
@@ -182,7 +282,7 @@ const EmployerSignup = () => {
                 {step === 1 ? (
                   <div className="grid grid-cols-1 gap-6">
                     <div className="relative">
-                      <BuildingIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <BuildingIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="text"
                         name="companyName"
@@ -194,7 +294,7 @@ const EmployerSignup = () => {
                     </div>
 
                     <div className="relative">
-                      <MailIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <MailIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="email"
                         name="email"
@@ -206,7 +306,7 @@ const EmployerSignup = () => {
                     </div>
 
                     <div className="relative">
-                      <LockIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <LockIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="password"
                         name="password"
@@ -217,8 +317,28 @@ const EmployerSignup = () => {
                       />
                     </div>
 
+                    {formData.password && (
+                      <div className="px-4 py-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Password Requirements:</p>
+                        <div className="space-y-1">
+                          <div className={`flex items-center gap-2 text-sm ${passwordRequirements.length ? 'text-green-600' : 'text-gray-500'}`}>
+                            <CheckCircleIcon className={`w-4 h-4 ${passwordRequirements.length ? 'text-green-600' : 'text-gray-400'}`} />
+                            At least 8 characters
+                          </div>
+                          <div className={`flex items-center gap-2 text-sm ${passwordRequirements.capital ? 'text-green-600' : 'text-gray-500'}`}>
+                            <CheckCircleIcon className={`w-4 h-4 ${passwordRequirements.capital ? 'text-green-600' : 'text-gray-400'}`} />
+                            At least one capital letter
+                          </div>
+                          <div className={`flex items-center gap-2 text-sm ${passwordRequirements.symbol ? 'text-green-600' : 'text-gray-500'}`}>
+                            <CheckCircleIcon className={`w-4 h-4 ${passwordRequirements.symbol ? 'text-green-600' : 'text-gray-400'}`} />
+                            At least one symbol (!@#$%^&*)
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="relative">
-                      <LockIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <LockIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="password"
                         name="confirmPassword"
@@ -231,8 +351,35 @@ const EmployerSignup = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-6">
+                    {/* Company Logo Upload */}
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="relative group">
+                        <div className="w-32 h-32 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden hover:border-teal-300 transition-colors">
+                          {companyLogo ? (
+                            <img
+                              src={companyLogo}
+                              alt="Company Logo"
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          ) : (
+                            <BuildingIcon className="w-12 h-12 text-gray-400" />
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setUploadModalOpen(true)}
+                          className="absolute bottom-0 right-0 bg-teal-600 p-2 rounded-full shadow-lg hover:bg-teal-700 transition-colors"
+                        >
+                          <Upload className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-500 text-center">
+                        Upload your company logo
+                      </p>
+                    </div>
+
                     <div className="relative">
-                      <MapPinIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <MapPinIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="text"
                         name="address"
@@ -245,7 +392,7 @@ const EmployerSignup = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
-                        <MapPinIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                        <MapPinIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                         <input
                           type="text"
                           name="city"
@@ -257,20 +404,21 @@ const EmployerSignup = () => {
                       </div>
 
                       <div className="relative">
-                        <MapPinIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                        <MapPinIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                         <input
                           type="text"
                           name="state"
                           value={formData.state}
                           onChange={handleInputChange}
                           placeholder="State"
+                          maxLength={2}
                           className="w-full px-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
                         />
                       </div>
                     </div>
 
                     <div className="relative">
-                      <PhoneIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <PhoneIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="tel"
                         name="phone"
@@ -282,7 +430,7 @@ const EmployerSignup = () => {
                     </div>
 
                     <div className="relative">
-                      <GlobeIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <GlobeIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="url"
                         name="website"
@@ -294,13 +442,14 @@ const EmployerSignup = () => {
                     </div>
 
                     <div className="relative">
-                      <HashIcon className="absolute left-4 top-3.5 text-teal-600 w-5 h-5" />
+                      <HashIcon className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
                       <input
                         type="text"
                         name="taxNumber"
                         value={formData.taxNumber}
                         onChange={handleInputChange}
                         placeholder="EIN/Tax Number"
+                        maxLength={9}
                         className="w-full px-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
                       />
                     </div>
@@ -361,6 +510,12 @@ const EmployerSignup = () => {
           </>
         )}
       </div>
+      
+      <UploadImageModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onSave={handleLogoUpload}
+      />
     </main>
   );
 };

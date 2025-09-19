@@ -1,23 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "axiosInstance";
+import { authService } from "../services/authService";
+import employerLocalStorageService from "../services/employerLocalStorageService";
 
 interface EmployerAuthState {
   employer: EmployerLoginResponse["employer"] | null;
-  token: string | null;
   loading: boolean;
   error: string | null;
 }
 
-const persistedEmployerAuthState = localStorage.getItem("employerAuthState");
-
-const initialState: EmployerAuthState = persistedEmployerAuthState
-  ? JSON.parse(persistedEmployerAuthState)
-  : {
-      employer: null,
-      token: null,
-      loading: false,
-      error: null,
-    };
+const initialState: EmployerAuthState = {
+  employer: null,
+  loading: false,
+  error: null,
+};
 
 interface EmployerLoginPayload {
   email: string;
@@ -25,8 +21,8 @@ interface EmployerLoginPayload {
 }
 
 interface EmployerLoginResponse {
-  token: string;
   employer: any;
+  // Remove employerToken field since we're using httpOnly cookies
 }
 
 export const employerSignup = createAsyncThunk<
@@ -55,7 +51,6 @@ export const employerSignup = createAsyncThunk<
   }
 });
 
-
 export const employerLogin = createAsyncThunk<
   EmployerLoginResponse,
   EmployerLoginPayload,
@@ -75,16 +70,54 @@ export const employerLogin = createAsyncThunk<
   }
 });
 
+export const employerLogout = createAsyncThunk<
+  void,
+  void,
+  { rejectValue: string }
+>("employerAuth/logout", async (_, thunkAPI) => {
+  try {
+    await authService.employerLogout();
+  } catch (err: any) {
+    const errorMessage =
+      err.response?.data?.message || "Logout failed. Please try again.";
+    return thunkAPI.rejectWithValue(errorMessage);
+  }
+});
+
+export const checkEmployerAuth = createAsyncThunk<
+  EmployerLoginResponse,
+  void,
+  { rejectValue: string }
+>("employerAuth/checkAuth", async (_, thunkAPI) => {
+  try {
+    console.log("employerAuthSlice: Making request to /employer/me");
+    const response = await axiosInstance.get("/employer/me");
+    console.log("employerAuthSlice: Response received:", response.data);
+    return response.data;
+  } catch (err: any) {
+    console.error("employerAuthSlice: Auth check failed:", err.response?.status, err.response?.data);
+    const errorMessage =
+      err.response?.data?.message || "Authentication check failed.";
+    return thunkAPI.rejectWithValue(errorMessage);
+  }
+});
 
 export const employerAuthSlice = createSlice({
   name: "employerAuth",
   initialState,
   reducers: {
-    employerLogout: (state) => {
+    clearEmployer: (state) => {
       state.employer = null;
-      state.token = null;
-      localStorage.removeItem("employerAuthState");
+      // Clear localStorage when clearing employer
+      employerLocalStorageService.clearEmployerData();
     },
+    setEmployer: (state, action) => {
+      state.employer = action.payload;
+      // Note: Employer data is not saved to localStorage for security reasons
+      // Only httpOnly cookies are used for authentication persistence
+    },
+    // Note: Employer data restoration now relies on server auth check via httpOnly cookies
+    // localStorage only contains non-sensitive operational data (jobs, applications)
   },
   extraReducers: (builder) => {
     builder
@@ -94,16 +127,8 @@ export const employerAuthSlice = createSlice({
       })
       .addCase(employerLogin.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
         state.employer = action.payload.employer;
-
-        localStorage.setItem(
-          "employerAuthState",
-          JSON.stringify({
-            token: action.payload.token,
-            employer: action.payload.employer,
-          })
-        );
+        // Note: Employer data is not saved to localStorage for security reasons
       })
       .addCase(employerLogin.rejected, (state, action) => {
         state.loading = false;
@@ -115,23 +140,49 @@ export const employerAuthSlice = createSlice({
       })
       .addCase(employerSignup.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
         state.employer = action.payload.employer;
-
-        localStorage.setItem(
-          "employerAuthState",
-          JSON.stringify({
-            token: action.payload.token,
-            employer: action.payload.employer,
-          })
-        );
+        // Note: Employer data is not saved to localStorage for security reasons
       })
       .addCase(employerSignup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Unknown error occurred during signup.";
+      })
+      .addCase(employerLogout.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(employerLogout.fulfilled, (state) => {
+        state.loading = false;
+        state.employer = null;
+        state.error = null;
+        // Clear localStorage on logout
+        employerLocalStorageService.clearEmployerData();
+      })
+      .addCase(employerLogout.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Logout failed.";
+        // Still clear employer state and localStorage even if logout request failed
+        state.employer = null;
+        employerLocalStorageService.clearEmployerData();
+      })
+      .addCase(checkEmployerAuth.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(checkEmployerAuth.fulfilled, (state, action) => {
+        state.loading = false;
+        state.employer = action.payload.employer;
+        state.error = null;
+        // Note: Employer data is not saved to localStorage for security reasons
+      })
+      .addCase(checkEmployerAuth.rejected, (state, action) => {
+        state.loading = false;
+        state.employer = null;
+        // Don't set error for auth check failures as they're expected when not logged in
+        state.error = null;
       });
   },
 });
 
-export const { employerLogout } = employerAuthSlice.actions;
+export const { clearEmployer, setEmployer } = employerAuthSlice.actions;
 export default employerAuthSlice.reducer;

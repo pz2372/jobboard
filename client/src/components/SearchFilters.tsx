@@ -1,32 +1,29 @@
 import { DollarSign, X } from "lucide-react";
-import React, { useState } from "react";
-
-type Filters = {
-  jobType: string[];
-  minWage: string;
-  maxWage: string;
-  location: string[];
-  experience: string[];
-};
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "redux/store";
+import { updateJobType, updateMinWage, updateMaxWage, updateLocation, updateExperience, clearAllFilters, toggleFilterOpen } from "../redux/filterSlice";
 
 type SearchFiltersProps = {
   isFilterOpen: boolean;
   setIsFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  handleApplyFilter: any;
 };
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
   isFilterOpen,
   setIsFilterOpen,
-  handleApplyFilter,
 }) => {
-  const [filters, setFilters] = useState<Filters>({
-    jobType: [],
-    minWage: "",
-    maxWage: "",
-    location: [],
-    experience: [],
-  });
+  const dispatch = useDispatch();
+  const filters = useSelector((state: RootState) => state.filter.filters);
+
+  const handleClearFilters = () => {
+    dispatch(clearAllFilters());
+  };
+
+  const handleClose = () => {
+    dispatch(toggleFilterOpen());
+    setIsFilterOpen(false);
+  };
 
   return (
     <div
@@ -39,7 +36,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-semibold text-teal-600">Filters</h3>
         <button
-          onClick={() => setIsFilterOpen(false)}
+          onClick={handleClose}
           className="text-gray-400 hover:text-gray-600"
         >
           <X className="w-5 h-5" />
@@ -55,14 +52,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 type="checkbox"
                 className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                 checked={filters.jobType.includes(type)}
-                onChange={(e) =>
-                  setFilters((prev) => {
-                    const updatedJobTypes = e.target.checked
-                      ? [...prev.jobType, type]
-                      : prev.jobType.filter((t) => t !== type);
-                    return { ...prev, jobType: updatedJobTypes };
-                  })
-                }
+                onChange={() => dispatch(updateJobType(type))}
               />
               {type}
             </label>
@@ -73,42 +63,29 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           <label className="font-medium text-center text-gray-700 block">
             Hourly Wage Range ($)
           </label>
-          <div className="flex items-center space-x-2">
-            <div className="flex-1 relative">
+          <div className="flex flex-col space-y-2">
+            <div className="relative">
               <DollarSign className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
               <input
                 type="number"
                 min="0"
                 step="0.50"
                 placeholder="Min"
-                className="w-full px-8 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
+                className="w-full max-w-40 px-8 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
                 value={filters.minWage}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    minWage: e.target.value,
-                  }))
-                }
+                onChange={(e) => dispatch(updateMinWage(e.target.value))}
               />
             </div>
-            <div className="flex items-center">
-              <span className="text-gray-500">-</span>
-            </div>
-            <div className="flex-1 relative">
+            <div className="relative">
               <DollarSign className="absolute left-4 top-4 text-teal-600 w-5 h-5" />
               <input
                 type="number"
                 min="0"
                 step="0.50"
                 placeholder="Max"
-                className="w-full pl-8 pr-5 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
+                className="w-full max-w-40 px-8 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent text-lg"
                 value={filters.maxWage}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    maxWage: e.target.value,
-                  }))
-                }
+                onChange={(e) => dispatch(updateMaxWage(e.target.value))}
               />
             </div>
           </div>
@@ -127,14 +104,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 type="checkbox"
                 className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                 checked={filters.experience.includes(level)}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    experience: e.target.checked
-                      ? [...prev.experience, level]
-                      : prev.experience.filter((exp) => exp !== level),
-                  }))
-                }
+                onChange={() => dispatch(updateExperience(level))}
               />
               {level}
             </label>
@@ -151,14 +121,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 type="checkbox"
                 className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                 checked={filters.location.includes(loc)}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    location: e.target.checked
-                      ? [...prev.location, loc]
-                      : prev.location.filter((l) => l !== loc),
-                  }))
-                }
+                onChange={() => dispatch(updateLocation(loc))}
               />
               {loc}
             </label>
@@ -168,24 +131,13 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
       <div className="flex justify-end mt-6 pt-6 border-t">
         <button
-          onClick={() =>
-            setFilters({
-              jobType: [],
-              minWage: "",
-              maxWage: "",
-              location: [],
-              experience: [],
-            })
-          }
+          onClick={handleClearFilters}
           className="px-6 py-2 text-gray-600 hover:text-gray-800 mr-4"
         >
           Clear All
         </button>
         <button
-          onClick={() => {
-            setIsFilterOpen(false);
-            handleApplyFilter(filters.minWage, filters.maxWage, filters.jobType);
-          }}
+          onClick={handleClose}
           className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-colors"
         >
           Apply Filters

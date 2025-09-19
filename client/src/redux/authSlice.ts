@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from 'axiosInstance';
 
-const savedUser = localStorage.getItem('user');
-const savedToken = localStorage.getItem('token');
+const savedUser = localStorage.getItem('authUser');
+const savedToken = localStorage.getItem('authToken');
 
 interface AuthState {
   user: any;
@@ -22,7 +22,7 @@ const initialState: AuthState = {
 export const login = createAsyncThunk('auth/login', async ({ email, password }: { email: string; password: string }, thunkAPI) => {
   try {
     const response = await axiosInstance.post('/user/login', { email, password });
-    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('authToken', response.data.token);
     return response.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || 'Login failed');
@@ -36,8 +36,8 @@ export const signup = createAsyncThunk(
   async ({ firstName, lastName, email, password }: { firstName: string; lastName: string; email: string; password: string }, thunkAPI) => {
     try {
       const response = await axiosInstance.post('/user/signup', { firstName, lastName, email, password });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user)); // Store user in localStorage
+      localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('authUser', JSON.stringify(response.data.user)); // Store user in localStorage
       return response.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message || 'Signup failed');
@@ -53,8 +53,10 @@ export const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      state.loading = false;
+      state.error = null;
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('authUser');
     },
   },
   extraReducers: (builder) => {
