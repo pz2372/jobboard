@@ -2,14 +2,11 @@ services:
   - type: web
     name: jobboard-api
     env: node
-    rootDir: server
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
       - key: DATABASE_NAME
         fromDatabase:
           name: jobboard-db
