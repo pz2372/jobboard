@@ -11,7 +11,7 @@ const TIMEOUT = 60000; // 30 seconds
 const isDevelopment = window.location.hostname === 'localhost';
 const baseURL = isDevelopment 
   ? "http://localhost:4000" 
-  : (window as any).env?.REACT_APP_API_URL || "https://jobboard-api.onrender.com"; // Replace with your actual Render URL
+  : (window as any).env?.REACT_APP_API_URL || "https://jobboard-7q35.onrender.com";
 
 console.log('🔗 API Configuration:', {
   isDevelopment,
