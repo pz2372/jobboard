@@ -3,11 +3,11 @@ const winston = require('winston');
 // Environment variables validator for security
 const requiredEnvVars = [
   'JWT_SECRET',
-  'DB_NAME',
-  'DB_USER',
-  'DB_PASSWORD',
-  'DB_HOST',
-  'DB_PORT'
+  'DATABASE_NAME',
+  'DATABASE_USER',
+  'DATABASE_PASSWORD',
+  'DATABASE_HOST',
+  'DATABASE_PORT'
 ];
 
 const optionalEnvVars = [
@@ -41,10 +41,14 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.Console({
       format: winston.format.simple()
-    }),
-    new winston.transports.File({ filename: 'logs/env-validation.log' })
+    })
   ]
 });
+
+// Add file logging only if not in production
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.File({ filename: 'logs/env-validation.log' }));
+}
 
 const validateEnvironment = () => {
   const errors = [];

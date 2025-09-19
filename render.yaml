@@ -7,6 +7,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: DATABASE_NAME
         fromDatabase:
           name: jobboard-db
@@ -25,14 +27,25 @@ services:
           property: host
       - key: DATABASE_PORT
         value: 5432
-      # Add other env vars as needed
+      # Security and app configuration
       - key: JWT_SECRET
         generateValue: true
+      - key: CORS_ORIGIN
+        value: "*"  # Update with your frontend URL when deployed
+      - key: SECURITY_MONITORING_ENABLED
+        value: false
+      # Cloudinary configuration (set these in Render dashboard)
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY  
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      # Stripe configuration (set in Render dashboard)
       - key: STRIPE_SECRET_KEY
         sync: false
+
+databases:
+  - name: jobboard-db
+    databaseName: jobboard
+    user: jobboard_user

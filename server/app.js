@@ -41,13 +41,17 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'jobs-board-api' },
   transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
     new winston.transports.Console({
       format: winston.format.simple()
     })
   ]
 });
+
+// Add file logging only if not in production or if logs directory exists
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.File({ filename: 'logs/error.log', level: 'error' }));
+  logger.add(new winston.transports.File({ filename: 'logs/combined.log' }));
+}
 
 // Rate limiting configurations
 const generalLimiter = rateLimit({
@@ -112,7 +116,7 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:3000', // Specific to React frontend
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000', // Allow frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true  // Allow credentials (cookies, auth headers)
 }));
@@ -177,8 +181,10 @@ app.get('/health', async (req, res) => {
   }
 });
 
-app.listen(4000, () => {
-  console.log('Server is running on http://localhost:4000');
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
   console.log(`Security Monitoring: ${process.env.SECURITY_MONITORING_ENABLED === 'true' ? '✅ ENABLED' : '❌ DISABLED'}`);
 });
 
