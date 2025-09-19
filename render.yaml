@@ -45,3 +45,8 @@ services:
       # Stripe configuration (set in Render dashboard)
       - key: STRIPE_SECRET_KEY
         sync: false
+
+databases:
+  - name: jobboard-db
+    databaseName: jobboard
+    user: jobboard_user
