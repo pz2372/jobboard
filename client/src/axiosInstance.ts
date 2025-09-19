@@ -7,10 +7,20 @@ interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 const TIMEOUT = 60000; // 30 seconds
 
-// Create base axios instance
+// Create base axios instance with dynamic baseURL
+const isDevelopment = window.location.hostname === 'localhost';
+const baseURL = isDevelopment 
+  ? "http://localhost:4000" 
+  : (window as any).env?.REACT_APP_API_URL || "https://jobboard-api.onrender.com"; // Replace with your actual Render URL
+
+console.log('🔗 API Configuration:', {
+  isDevelopment,
+  baseURL,
+  hostname: window.location.hostname
+});
+
 const axiosInstance = axios.create({
-  //baseURL: "https://7vgrrvphq3.execute-api.us-east-2.amazonaws.com/dev/api",
-  baseURL: "http://localhost:4000",
+  baseURL: baseURL,
   timeout: TIMEOUT,
   headers: {
     "Content-Type": "application/json",

@@ -27,7 +27,7 @@ services:
         value: 5432
       # Security and app configuration
       - key: JWT_SECRET
-        generateValue: true
+        sync: false  # Set this manually in Render dashboard with a 64+ char secret
       - key: CORS_ORIGIN
         value: "*"  # Update with your frontend URL when deployed
       - key: SECURITY_MONITORING_ENABLED
