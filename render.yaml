@@ -29,7 +29,7 @@ services:
       - key: JWT_SECRET
         sync: false  # Set this manually in Render dashboard with a 64+ char secret
       - key: CORS_ORIGIN
-        value: "https://your-frontend-domain.com,http://localhost:3000"  # Add your frontend URL when deployed
+        value: "https://*.netlify.app,http://localhost:3000"  # Allows any Netlify domain + local dev
       - key: SECURITY_MONITORING_ENABLED
         value: false
       # Cloudinary configuration (set these in Render dashboard)
